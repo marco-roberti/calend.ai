@@ -13,7 +13,7 @@ profile = 'CarloCalenda'
 profile_id = '2416067982'
 eval_size = 100
 
-start_time = '2018-06-01T00:00:00+01:00'
+start_time = '2020-10-18T00:00:00+01:00'
 
 
 def process_tweet(response_tweet):
