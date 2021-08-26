@@ -1,0 +1,21 @@
+{
+  'model_name_or_path': 'gsarti/t5-base-it',
+  'log_level': 'info',
+  'train_file': 'data/train.json',
+  'validation_file': 'data/valid.json',
+  'test_file': 'data/valid.json',
+  'output_dir': 'runs',
+  'do_train': true,
+  'do_predict': true,
+  'predict_with_generate': true,
+  'logging_steps': 100,
+  'save_steps': 500,
+  'save_total_limit': 1,
+  'load_best_model_at_end': true,
+  'evaluation_strategy': 'steps',
+  'metric_for_best_model': 'eval_loss',
+  'num_beams': 5,
+  'lr_scheduler_type': 'cosine_with_restarts',
+  'lr_scheduler_cycles': 50,
+  'num_train_epochs': 50
+}

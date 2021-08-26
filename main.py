@@ -43,12 +43,10 @@ from transformers.utils.versions import require_version
 from argument_classes import ModelArguments, DataTrainingArguments, Seq2SeqTrainingArgumentsWithScheduler, \
     Seq2SeqTrainerWithSchedulerArgs
 
-model_name = 'gsarti/t5-base-it'
-
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.9.0")
 
-require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/summarization/requirements.txt")
+require_version("datasets>=1.8.0", "To fix: pip install -r requirements.txt")
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +94,7 @@ def main():
     )
     logger.info(f"Training/evaluation parameters {training_args}")
 
-    if data_args.source_prefix is None and 't5' in model_name:
+    if data_args.source_prefix is None and 't5' in model_args.model_name_or_path:
         logger.warning(
             "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
             "`--source_prefix 'summarize: ' `"
@@ -150,21 +148,21 @@ def main():
     # The .from_pretrained methods guarantee that only one local process can concurrently
     # download model & vocab.
     config = AutoConfig.from_pretrained(
-        model_name,
+        model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        model_name,
+        model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
         use_fast=model_args.use_fast_tokenizer,
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
     model = AutoModelForSeq2SeqLM.from_pretrained(
-        model_name,
-        from_tf=bool(".ckpt" in model_name),
+        model_args.model_name_or_path,
+        from_tf=bool(".ckpt" in model_args.model_name_or_path),
         config=config,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
@@ -390,7 +388,7 @@ def main():
                     writer.write("\n".join(predictions))
 
     if training_args.push_to_hub:
-        kwargs = {"finetuned_from": model_name, "tasks": "summarization"}
+        kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "calend.ai"}
         trainer.push_to_hub(**kwargs)
 
     return results
