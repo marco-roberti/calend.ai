@@ -8,7 +8,8 @@ from tqdm import tqdm
 from twitter import connect_to_endpoint
 
 search_url = 'https://api.twitter.com/2/tweets/search/all'
-tweet_url = 'https://api.twitter.com/2/tweets?ids='
+tweet_url = 'https://api.twitter.com/2/tweets/'
+profile_url = 'https://api.twitter.com/2/users/'
 profile = 'CarloCalenda'
 profile_id = '2416067982'
 eval_size = 100
@@ -26,12 +27,14 @@ def process_tweet(response_tweet):
     # Ensure this tweet answers to an existing one (again)
     if 'errors' in input_tweet:
         return None, response_tweet['created_at']
-    input_tweet = input_tweet['data'][0]
+    input_tweet = input_tweet['data']
     # Exclude self-answers
     if input_tweet['author_id'] == profile_id:
         return None, response_tweet['created_at']
+    # Get input tweet's username
+    username = connect_to_endpoint(profile_url + input_tweet['author_id'], {})['data']['username']
     # Return actual data
-    input_text = input_tweet['text']
+    input_text = f'@{username}: ' + input_tweet['text']
     response_text = response_tweet['text']
     return {'input': input_text, 'output': response_text}, response_tweet['created_at']
 
