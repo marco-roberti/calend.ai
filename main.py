@@ -446,7 +446,8 @@ def main():
         # Some simple post-processing
         decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
         for pred, label in zip(decoded_preds[:3], decoded_labels[:3]):
-            print(f'Pred: {pred}\nRef:  {label}\n')
+            logger.info(f'Pred: {pred}')
+            logger.info('Ref:  {label}\n')
 
         result = metric.compute(predictions=decoded_preds, references=decoded_labels)
         result = {"bleu": result["score"]}
