@@ -32,9 +32,11 @@ def process_tweet(response_tweet):
     if input_tweet['author_id'] == profile_id:
         return None, response_tweet['created_at']
     # Get input tweet's username
-    username = connect_to_endpoint(profile_url + input_tweet['author_id'], {})['data']['username']
+    input_user = connect_to_endpoint(profile_url + input_tweet['author_id'], {})['data']
+    username = input_user['username']
+    name = input_user['name']
     # Return actual data
-    input_text = f'@{username}: ' + input_tweet['text']
+    input_text = f'{name} @{username} : ' + input_tweet['text']
     response_text = response_tweet['text']
     return {'input': input_text, 'output': response_text}, response_tweet['created_at']
 
