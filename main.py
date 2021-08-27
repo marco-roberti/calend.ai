@@ -40,8 +40,12 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from argument_classes import ModelArguments, DataTrainingArguments, Seq2SeqTrainingArgumentsWithScheduler, \
-    Seq2SeqTrainerWithSchedulerArgs
+from argument_classes import (
+    ModelArguments,
+    DataTrainingArguments,
+    Seq2SeqTrainingArgumentsRefined,
+    Seq2SeqTrainerRefined
+)
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.9.0")
@@ -66,7 +70,7 @@ def main():
     # or by passing the --help flag to this script.
     # We now keep distinct sets of args, for a cleaner separation of concerns.
 
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, Seq2SeqTrainingArgumentsWithScheduler))
+    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, Seq2SeqTrainingArgumentsRefined))
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
@@ -315,7 +319,7 @@ def main():
         return result
 
     # Initialize our Trainer
-    trainer = Seq2SeqTrainerWithSchedulerArgs(
+    trainer = Seq2SeqTrainerRefined(
         model=model,
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
@@ -323,6 +327,19 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
+        max_new_tokens=model_args.max_new_tokens,
+        min_length=model_args.min_length,
+        do_sample=model_args.do_sample,
+        early_stopping=model_args.early_stopping,
+        temperature=model_args.temperature,
+        top_k=model_args.top_k,
+        top_p=model_args.top_p,
+        repetition_penalty=model_args.repetition_penalty,
+        length_penalty=model_args.length_penalty,
+        no_repeat_ngram_size=model_args.no_repeat_ngram_size,
+        encoder_no_repeat_ngram_size=model_args.encoder_no_repeat_ngram_size,
+        num_beam_groups=model_args.num_beam_groups,
+        diversity_penalty=model_args.diversity_penalty
     )
 
     # Training
