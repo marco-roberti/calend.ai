@@ -16,8 +16,8 @@ def main(args):
     name = input('Display name:\t')
     username = '@' + input('Username:\t@')
 
+    print('From now on, you can write your tweets to @CarloCalenda')
     while True:
-        print('Write your tweet to @CarloCalenda')
         text = f'{name} {username} : ' + input('> ')
         text = tokenizer(text, return_tensors='pt')
         answers = model.generate(**text, **gen_args)
