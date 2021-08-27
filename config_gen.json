@@ -1,0 +1,16 @@
+{
+  "min_length": 0,
+  "max_length": 512,
+  "num_beams": 5,
+  "do_sample": true,
+  "temperature": 1.0,
+  "top_k": 50,
+  "top_p": 1.0,
+  "repetition_penalty": 5.0,
+  "length_penalty": 1.0,
+  "no_repeat_ngram_size": 0,
+  "encoder_no_repeat_ngram_size": 0,
+  "num_return_sequences": 1,
+  "num_beam_groups": 1,
+  "diversity_penalty": 0
+}
