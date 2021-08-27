@@ -28,7 +28,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGINT, exit)
+    signal.signal(signal.SIGINT, lambda signum, frame: exit())
     parser = ArgumentParser('Interactive generation of @CarloCalenda\'s response tweets')
     parser.add_argument('model_path')
     parser.add_argument('config_file')
