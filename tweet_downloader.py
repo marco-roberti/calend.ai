@@ -12,7 +12,6 @@ tweet_url = 'https://api.twitter.com/2/tweets/'
 profile_url = 'https://api.twitter.com/2/users/'
 profile = 'CarloCalenda'
 profile_id = '2416067982'
-eval_size = 100
 
 start_time = '2020-10-18T00:00:00+01:00'
 
@@ -71,6 +70,7 @@ def download_tweets():
         process_response()
 
     random.shuffle(tweets)
+    eval_size = round(0.1 * len(tweets))
     with open(path.join('data', f'valid.json'), 'w') as f:
         for _ in range(eval_size):
             f.write(json.dumps(tweets.pop()) + '\n')
