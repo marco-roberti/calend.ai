@@ -53,6 +53,10 @@ class ModelArguments:
         default=10,
         metadata={"help": "The minimum length of the sequence to be generated."},
     )
+    max_length: Optional[int] = field(
+        default=512,
+        metadata={"help": "The maximum target length to use when predicting with the generate method."},
+    )
     do_sample: Optional[bool] = field(
         default=False,
         metadata={"help": "Whether or not to use sampling ; use greedy decoding otherwise."},
@@ -266,13 +270,15 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
                  compute_metrics: Optional[Callable[[EvalPrediction], Dict]] = None,
                  callbacks: Optional[List[TrainerCallback]] = None,
                  optimizers: Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR] = (None, None),
-                 max_new_tokens=None, min_length=10, do_sample=False, early_stopping=False, temperature=1.0, top_k=50,
-                 top_p=1.0, repetition_penalty=1.0, length_penalty=1.0, no_repeat_ngram_size=0,
-                 encoder_no_repeat_ngram_size=0, num_beam_groups=1, diversity_penalty=0.0):
+                 max_new_tokens=None, min_length=10, max_length=512, num_beams=1, do_sample=False, early_stopping=False,
+                 temperature=1.0, top_k=50, top_p=1.0, repetition_penalty=1.0, length_penalty=1.0,
+                 no_repeat_ngram_size=0, encoder_no_repeat_ngram_size=0, num_beam_groups=1, diversity_penalty=0.0):
         super().__init__(model, args, data_collator, train_dataset, eval_dataset, tokenizer, model_init,
                          compute_metrics, callbacks, optimizers)
         self.max_new_tokens = max_new_tokens
         self.min_length = min_length
+        self.max_length = max_length
+        self.num_beams = num_beams
         self.do_sample = do_sample
         self.early_stopping = early_stopping
         self.temperature = temperature
@@ -357,8 +363,8 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
         inputs = self._prepare_inputs(inputs)
 
         gen_kwargs = {
-            "max_length": self._max_length if self._max_length is not None else self.model.config.max_length,
-            "num_beams": self._num_beams if self._num_beams is not None else self.model.config.num_beams,
+            "max_length": self.max_length,
+            "num_beams": self.num_beams,
             "synced_gpus": True if is_deepspeed_zero3_enabled() else False,
             "max_new_tokens": self.max_new_tokens,
             "min_length": self.min_length,

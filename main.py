@@ -329,6 +329,8 @@ def main():
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
         max_new_tokens=model_args.max_new_tokens,
         min_length=model_args.min_length,
+        max_length=model_args.max_length,
+        num_beams=data_args.num_beams,
         do_sample=model_args.do_sample,
         early_stopping=model_args.early_stopping,
         temperature=model_args.temperature,
