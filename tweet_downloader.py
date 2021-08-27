@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 from os import path
 
 from tqdm import tqdm
@@ -36,7 +37,7 @@ def process_tweet(response_tweet):
     name = input_user['name']
     # Return actual data
     input_text = f'{name} @{username} : ' + input_tweet['text']
-    response_text = response_tweet['text']
+    response_text = re.sub(r' http[^ ]+$', '', response_tweet['text'])
     return {'input': input_text, 'output': response_text}, response_tweet['created_at']
 
 
