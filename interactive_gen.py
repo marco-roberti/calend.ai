@@ -1,5 +1,6 @@
 import json
 from argparse import ArgumentParser
+import signal
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -27,6 +28,7 @@ def main(args):
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, exit)
     parser = ArgumentParser('Interactive generation of @CarloCalenda\'s response tweets')
     parser.add_argument('model_path')
     parser.add_argument('config_file')
