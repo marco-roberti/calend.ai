@@ -30,16 +30,16 @@ def process_tweet(response_tweet):
     if 'errors' in input_tweet:
         return None, response_tweet['created_at']
     input_tweet = input_tweet['data']
-    # Exclude self-answers
-    if input_tweet['author_id'] == profile_id:
+    # Exclude self-answers and non-answers
+    if input_tweet['author_id'] == profile_id or profile not in input_tweet['text']:
         return None, response_tweet['created_at']
     # Get input tweet's username
     input_user = connect_to_endpoint(profile_url + input_tweet['author_id'], {})['data']
     username = input_user['username']
     name = input_user['name']
     # Return actual data
-    input_text = f'{name} @{username} : ' + input_tweet['text']
-    response_text = re.sub(r' http[^ ]+$', '', response_tweet['text'])
+    input_text = f'{name} @{username} : ' + input_tweet['text'].replace('@CarloCalenda', '@Calend_AI')
+    response_text = re.sub(r' http[^ ]+$', '', response_tweet['text']).replace('@CarloCalenda', '@Calend_AI')
     return {'input': input_text, 'output': response_text}, response_tweet['created_at']
 
 
