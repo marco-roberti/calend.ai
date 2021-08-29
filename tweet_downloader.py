@@ -1,4 +1,5 @@
 import calendar
+import datetime
 import json
 import os
 import random
@@ -97,7 +98,7 @@ def months_iterator(start_date, end_date):
         month_end += days_in_month
         iterator.append((month_start, month_end))
         month_start += days_in_month
-    iterator.append((date(end_date.year, end_date.month, 1), end_date))
+    iterator[-1] = (date(end_date.year, end_date.month, 1), end_date)
     return iterator
 
 
@@ -105,9 +106,11 @@ def main(args):
     if not path.isdir('data'):
         os.mkdir('data')
 
+    tweets = list()
     start_date = date.fromisoformat(args.start_date)
-    end_date = date.today()
-    tweets = [download_chunk(start, end) for start, end in months_iterator(start_date, end_date)]
+    end_date = date.today() - datetime.timedelta(days=1)
+    for start, end in months_iterator(start_date, end_date):
+        tweets.extend(download_chunk(start, end))
 
     # Shuffle, split and save dataset
     random.shuffle(tweets)
