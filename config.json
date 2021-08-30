@@ -13,8 +13,8 @@
   "save_total_limit": 1,
   "load_best_model_at_end": true,
   "evaluation_strategy": "steps",
-  "max_eval_samples": 100
-  "metric_for_best_model": "eval_loss",
+  "max_eval_samples": 100,
+  "metric_for_best_model": "eval_bleu",
   "lr_scheduler_type": "cosine_with_restarts",
   "lr_scheduler_cycles": 20,
   "num_train_epochs": 20,
