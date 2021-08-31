@@ -286,7 +286,7 @@ def main():
     )
 
     # Metric
-    metric = load_metric("sacrebleu")
+    metric = load_metric("bertscore")
 
     def postprocess_text(preds, labels):
         preds = [pred.strip() for pred in preds]
@@ -310,8 +310,8 @@ def main():
             logger.info(f'Pred: {pred}')
             logger.info(f'Ref:  {label[0]}\n')
 
-        result = metric.compute(predictions=decoded_preds, references=decoded_labels)
-        result = {"bleu": result["score"]}
+        result = metric.compute(predictions=decoded_preds, references=decoded_labels, lang="it")
+        result = {m: np.mean(vals) for m, vals in result.items() if m != 'hashcode'}
 
         prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]
         result["gen_len"] = np.mean(prediction_lens)
