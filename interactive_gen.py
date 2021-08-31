@@ -16,14 +16,14 @@ def main(args):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
-    print('From now on, you can write your tweets to @CalendAI')
+    print('From now on, you can write your tweets to @Calend_AI')
     while True:
         text = f'{name} {username} : ' + input('> ')
         text = tokenizer(text, return_tensors='pt')
         answers = model.generate(**text, **gen_args)
         answers = tokenizer.batch_decode(answers, skip_special_tokens=True)
         for answer in answers:
-            print(f'@CalendAI: {answer}')
+            print(f'@Calend_AI: {answer}')
         print()
 
 
