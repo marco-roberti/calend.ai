@@ -310,7 +310,8 @@ def main():
             logger.info(f'Pred: {pred}')
             logger.info(f'Ref:  {label[0]}\n')
 
-        result = metric.compute(predictions=decoded_preds, references=decoded_labels, lang="it")
+        result = metric.compute(predictions=decoded_preds, references=decoded_labels,
+                                model_type="dbmdz/bert-base-italian-uncased", num_layers=12)
         result = {m: np.mean(vals) for m, vals in result.items() if m != 'hashcode'}
 
         prediction_lens = [np.count_nonzero(pred != tokenizer.pad_token_id) for pred in preds]
