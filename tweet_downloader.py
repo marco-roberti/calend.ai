@@ -10,11 +10,8 @@ from os import path
 
 from tqdm import tqdm
 
-from twitter import connect_to_endpoint
+from twitter import connect_to_endpoint, tweet_url, search_url, get_profile_data
 
-search_url = 'https://api.twitter.com/2/tweets/search/all'
-tweet_url = 'https://api.twitter.com/2/tweets/'
-profile_url = 'https://api.twitter.com/2/users/'
 profile = 'CarloCalenda'
 profile_id = '2416067982'
 
@@ -34,9 +31,7 @@ def process_tweet(response_tweet):
     if input_tweet['author_id'] == profile_id or profile not in input_tweet['text']:
         return None, response_tweet['created_at']
     # Get input tweet's username
-    input_user = connect_to_endpoint(profile_url + input_tweet['author_id'], {})['data']
-    username = input_user['username']
-    name = input_user['name']
+    username, name = get_profile_data(input_tweet['author_id'])
     # Return actual data
     input_text = f'{name} @{username} : ' + input_tweet['text'].replace('@CarloCalenda', '@Calend_AI')
     response_text = re.sub(r' http[^ ]+$', '', response_tweet['text']).replace('@CarloCalenda', '@Calend_AI')
