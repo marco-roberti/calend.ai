@@ -9,8 +9,6 @@ import requests
 # To set your environment variables in your terminal run the following line:
 # export 'BEARER_TOKEN'='<your_bearer_token>'
 bearer_token = os.environ.get("BEARER_TOKEN")
-consumer_key = os.environ.get("CONSUMER_KEY")
-consumer_secret = os.environ.get("CONSUMER_SECRET")
 
 search_url = 'https://api.twitter.com/2/tweets/search/all'
 tweet_url = 'https://api.twitter.com/2/tweets/'

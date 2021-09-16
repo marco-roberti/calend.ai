@@ -1,5 +1,6 @@
 import json
 import logging
+import random
 
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
@@ -19,10 +20,10 @@ class CalendaBot:
         logging.info(f'Replying to tweet {response_bytes}')
         to_tweet = Tweet(json.loads(response_bytes)['data'])
         replies = self.reply_to(to_tweet)
-        for reply in set(replies):
-            if f'@{to_tweet.username.lower()}' not in reply:
-                reply = f'@{to_tweet.username.lower()} {reply}'
-            post_reply(reply, to_tweet)
+        reply = random.choice(replies)
+        if f'@{to_tweet.username.lower()}' not in reply:
+            reply = f'@{to_tweet.username.lower()} {reply}'
+        post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):
         text = f'{tweet.name} {tweet.username} : {tweet.text}'
