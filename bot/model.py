@@ -29,7 +29,7 @@ class CalendaBot:
         text = self.tokenizer(text, return_tensors='pt')
         replies = self.model.generate(**text, **self.gen_args)
         replies = self.tokenizer.batch_decode(replies, skip_special_tokens=True)
-        return [self.post_process(reply, tweet) for reply in replies]
+        return list(set(self.post_process(reply, tweet) for reply in replies))
 
     def interactive_set_args(self):
         while True:
