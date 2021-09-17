@@ -46,10 +46,14 @@ class CalendaBot:
 
     @staticmethod
     def post_process(reply, to_tweet):
+        # Remove unrelated mentions
         re_username = r'@([a-zA-Z0-9_]+)'
         for username in re.findall(re_username, reply):
             if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
-                reply = reply.replace(f'@{username}', username)
+                reply = reply.replace(f'@{username}', '')
+        # Remove old-fashioned parties
+        reply = re.sub(r'-?siamoeuropei', '', reply)
+        # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply}'
         return reply
