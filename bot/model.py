@@ -40,6 +40,6 @@ class CalendaBot:
             if not i:
                 return
             k = keys[int(i)]
-            v = input('new value: ')
+            v = input(f'{i}. {k}\t= ')
             self.gen_args[k] = type(self.gen_args[k])(v)
             print()
