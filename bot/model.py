@@ -30,3 +30,16 @@ class CalendaBot:
         text = self.tokenizer(text, return_tensors='pt')
         answers = self.model.generate(**text, **self.gen_args)
         return self.tokenizer.batch_decode(answers, skip_special_tokens=True)
+
+    def interactive_set_args(self):
+        while True:
+            keys = list(self.gen_args.keys())
+            for i, k in enumerate(keys):
+                print(f'{i}. {k}\t= {self.gen_args[k]}')
+            i = input('Key to set: ')
+            if not i:
+                return
+            k = keys[int(i)]
+            v = input('new value: ')
+            self.gen_args[k] = type(self.gen_args[k])(v)
+            print()

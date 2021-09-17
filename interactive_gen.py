@@ -6,15 +6,18 @@ from twitter import Tweet
 
 
 def main(args):
+    bot = CalendaBot(args)
+
     name = input('Display name:\t')
     username = '@' + input('Username:\t@')
     tweet = Tweet('', username, name)
 
-    bot = CalendaBot(args)
-
     print('From now on, you can write your tweets to @Calend_AI')
     while True:
         tweet.text = input('> ')
+        if not tweet.text:
+            bot.interactive_set_args()
+            continue
         answers = bot.reply_to(tweet)
         for answer in answers:
             print(f'@Calend_AI: {answer}')
