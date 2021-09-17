@@ -18,7 +18,7 @@ class CalendaBot:
 
     def on_quote(self, response_bytes):
         logging.info(f'Replying to tweet {response_bytes}')
-        to_tweet = Tweet(json.loads(response_bytes)['data'])
+        to_tweet = Tweet.from_http(json.loads(response_bytes)['data'])
         replies = self.reply_to(to_tweet)
         reply = random.choice(replies)
         if f'@{to_tweet.username.lower()}' not in reply:

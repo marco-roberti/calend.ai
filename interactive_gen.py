@@ -1,27 +1,21 @@
-import json
-from argparse import ArgumentParser
 import signal
+from argparse import ArgumentParser
 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from bot.model import CalendaBot
+from twitter import Tweet
 
 
 def main(args):
     name = input('Display name:\t')
     username = '@' + input('Username:\t@')
+    tweet = Tweet('', username, name)
 
-    with open(args.config_file) as f:
-        gen_args = json.load(f)
-
-    model_path = args.model_path
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+    bot = CalendaBot(args)
 
     print('From now on, you can write your tweets to @Calend_AI')
     while True:
-        text = f'{name} {username} : ' + input('> ')
-        text = tokenizer(text, return_tensors='pt')
-        answers = model.generate(**text, **gen_args)
-        answers = tokenizer.batch_decode(answers, skip_special_tokens=True)
+        tweet.text = input('> ')
+        answers = bot.reply_to(tweet)
         for answer in answers:
             print(f'@Calend_AI: {answer}')
         print()

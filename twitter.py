@@ -63,10 +63,16 @@ def post_reply(reply, to_tweet):
 
 
 class Tweet:
-    def __init__(self, http_response):
-        self.id = http_response['id']
-        self.text = http_response['text']
-        self.username, self.name = get_tweet_author(self.id)
+    def __init__(self, text, username, name, tweet_id=None):
+        self.text = text
+        self.username = username
+        self.name = name
+        self.id = tweet_id
+
+    @classmethod
+    def from_http(cls, http_response):
+        username, name = get_tweet_author(http_response['id'])
+        return cls(http_response['text'], username, name, tweet_id=http_response['id'])
 
 
 class Stream:
