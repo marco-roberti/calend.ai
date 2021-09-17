@@ -55,5 +55,5 @@ class CalendaBot:
         reply = re.sub(r'-?siamoeuropei', '', reply)
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
-            reply = f'@{to_tweet.username.lower()} {reply}'
+            reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         return reply
