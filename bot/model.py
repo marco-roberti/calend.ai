@@ -22,8 +22,6 @@ class CalendaBot:
         to_tweet = Tweet.from_http(json.loads(response_bytes)['data'])
         replies = self.reply_to(to_tweet)
         reply = random.choice(replies)
-        if f'@{to_tweet.username.lower()}' not in reply:
-            reply = f'@{to_tweet.username.lower()} {reply}'
         post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):
@@ -48,7 +46,10 @@ class CalendaBot:
 
     @staticmethod
     def post_process(reply, to_tweet):
-        for username in re.findall(r'@([a-zA-Z0-9_]+)', reply):
-            if username != to_tweet.username.lower():
+        re_username = r'@([a-zA-Z0-9_]+)'
+        for username in re.findall(re_username, reply):
+            if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
                 reply = reply.replace(username, '')
+        if f'@{to_tweet.username.lower()}' not in reply:
+            reply = f'@{to_tweet.username.lower()} {reply}'
         return reply
