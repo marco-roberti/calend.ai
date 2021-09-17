@@ -49,7 +49,7 @@ class CalendaBot:
         re_username = r'@([a-zA-Z0-9_]+)'
         for username in re.findall(re_username, reply):
             if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
-                reply = reply.replace(username, '')
+                reply = reply.replace(f'@{username}', username)
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply}'
         return reply
