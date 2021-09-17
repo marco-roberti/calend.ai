@@ -50,7 +50,7 @@ class CalendaBot:
         re_username = r'@([a-zA-Z0-9_]+)'
         for username in re.findall(re_username, reply):
             if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
-                reply = reply.replace(f'@{username}', '')
+                reply = re.sub(rf' ?@{username}', '', reply)
         # Remove old-fashioned parties
         reply = re.sub(r'-?siamoeuropei', '', reply)
         # Ensure mention
