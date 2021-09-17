@@ -13,6 +13,7 @@ bearer_token = os.environ.get("BEARER_TOKEN")
 search_url = 'https://api.twitter.com/2/tweets/search/all'
 tweet_url = 'https://api.twitter.com/2/tweets/'
 profile_url = 'https://api.twitter.com/2/users/'
+rules_url = "https://api.twitter.com/2/tweets/search/stream/rules"
 
 
 def bearer_oauth(r):
@@ -88,7 +89,7 @@ class Stream:
     @staticmethod
     def _get_rules():
         logging.info('Getting stream rules')
-        response = requests.get("https://api.twitter.com/2/tweets/search/stream/rules", auth=bearer_oauth)
+        response = requests.get(rules_url, auth=bearer_oauth)
         assert response.status_code == 200, f'Cannot get rules (HTTP {response.status_code}): {response.text}'
         response = response.json()
         assert len(response['data']) == 1
@@ -103,7 +104,7 @@ class Stream:
         ids = list(map(lambda rule: rule["id"], rules["data"]))
         payload = {"delete": {"ids": ids}}
         response = requests.post(
-            "https://api.twitter.com/2/tweets/search/stream/rules",
+            rules_url,
             auth=bearer_oauth,
             json=payload
         )
@@ -117,7 +118,7 @@ class Stream:
         logging.info(f'Setting stream rules {rules}')
         payload = {"add": rules}
         response = requests.post(
-            "https://api.twitter.com/2/tweets/search/stream/rules",
+            rules_url,
             auth=bearer_oauth,
             json=payload,
         )
