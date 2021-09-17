@@ -1,6 +1,7 @@
 import json
 import logging
 import random
+import re
 
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
@@ -28,8 +29,9 @@ class CalendaBot:
     def reply_to(self, tweet: Tweet):
         text = f'{tweet.name} {tweet.username} : {tweet.text}'
         text = self.tokenizer(text, return_tensors='pt')
-        answers = self.model.generate(**text, **self.gen_args)
-        return self.tokenizer.batch_decode(answers, skip_special_tokens=True)
+        replies = self.model.generate(**text, **self.gen_args)
+        replies = self.tokenizer.batch_decode(replies, skip_special_tokens=True)
+        return [self.post_process(reply, tweet) for reply in replies]
 
     def interactive_set_args(self):
         while True:
@@ -43,3 +45,10 @@ class CalendaBot:
             v = input(f'{i}. {k}\t= ')
             self.gen_args[k] = type(self.gen_args[k])(v)
             print()
+
+    @staticmethod
+    def post_process(reply, to_tweet):
+        for username in re.findall(r'@([a-zA-Z0-9_]+)', reply):
+            if username != to_tweet.username.lower():
+                reply = reply.replace(username, '')
+        return reply
