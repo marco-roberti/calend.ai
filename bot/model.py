@@ -5,6 +5,7 @@ import re
 from queue import Queue
 from threading import Thread
 
+import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from twitter import post_reply, Tweet
@@ -36,8 +37,9 @@ class CalendaBot:
         reply = random.choice(replies)
 
         # ask for confirmation
-        print(f'\ntweet > {to_tweet}')
-        print(f'reply > {reply}')
+        tweet_and_reply = f'\ntweet > {to_tweet}\nreply > {reply}'
+        self._maybe_send_notification('Confirmation required:' + tweet_and_reply)
+        print(tweet_and_reply)
         confirmation = input('Post this reply? [y/n] > ').lower()
 
         if confirmation == 'y':
@@ -63,6 +65,7 @@ class CalendaBot:
 
         # Post reply
         logging.info(f'[sync] Replying to tweet {to_tweet}')
+        self._maybe_send_notification(f'New reply sent:\ntweet > {to_tweet}\nreply > {reply}')
         post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):
@@ -100,3 +103,10 @@ class CalendaBot:
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         return reply.strip()
+
+    @staticmethod
+    def _maybe_send_notification(message):
+        try:
+            telegram_send.send(messages=[message])
+        except Exception as e:
+            logging.warning(f"Couldn't send Telegram notification: {e}")
