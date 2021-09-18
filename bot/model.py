@@ -2,46 +2,67 @@ import json
 import logging
 import random
 import re
+from queue import Queue
+from threading import Thread
 
-from inputimeout import inputimeout, TimeoutOccurred
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from twitter import post_reply, Tweet
 
 
 class CalendaBot:
-    def __init__(self, args):
+    def __init__(self, args, interactive=False):
         with open(args.config_file) as f:
             self.gen_args = json.load(f)
 
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-        self.timeout = args.interactive_timeout if hasattr(args, 'interactive_timeout') else 30
 
-    def _confirm_tweet_reply(self, reply, to_tweet):
-        try:
-            # ask for confirmation with timeout
-            print(f'\ntweet > {to_tweet}')
-            print(f'reply > {reply}')
-            return inputimeout('Post this reply? [y/n] > ', self.timeout).lower() == 'y'
-        except TimeoutOccurred:
-            return False
+        self.interactive = interactive
+        if self.interactive:
+            # Some tweets' answers needs to be manually confirmed. This is done in a separate thread
+            self.queue = Queue()
+            Thread(target=self.worker, daemon=True).start()
+
+    def worker(self):
+        while True:
+            self.reply_and_check(self.queue.get())
+            self.queue.task_done()
+
+    def reply_and_check(self, to_tweet):
+        # Generate reply
+        replies = self.reply_to(to_tweet)
+        reply = random.choice(replies)
+
+        # ask for confirmation
+        print(f'\ntweet > {to_tweet}')
+        print(f'reply > {reply}')
+        confirmation = input('Post this reply? [y/n] > ').lower()
+
+        if confirmation == 'y':
+            logging.info(f'[async] Replying to tweet {to_tweet}')
+            post_reply(reply, to_tweet)
+        else:
+            logging.info(f'Tweet "{to_tweet}" ignored.')
 
     def on_quote(self, response_bytes):
         # Parse HTTP response
         response = json.loads(response_bytes)
-        # Generate reply
         to_tweet = Tweet.from_http(response['data'])
+
+        # Check manual confirmation
+        if len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
+            assert self.interactive
+            self.queue.put(to_tweet)
+            return
+
+        # Generate reply
         replies = self.reply_to(to_tweet)
         reply = random.choice(replies)
-        # Some tweets' answers needs to be manually confirmed
-        if len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
-            if not self._confirm_tweet_reply(reply, to_tweet):
-                logging.info('Tweet ignored.')
-                return
+
         # Post reply
-        logging.info(f'Replying to tweet {response}')
+        logging.info(f'[sync] Replying to tweet {to_tweet}')
         post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):

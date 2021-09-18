@@ -6,7 +6,7 @@ from twitter import Stream
 
 
 def main(args):
-    bot = CalendaBot(args)
+    bot = CalendaBot(args, interactive=True)
 
     stream = Stream([
         {"value": "@Calend_AI -is:retweet -is:reply"},
