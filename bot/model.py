@@ -28,23 +28,21 @@ class CalendaBot:
 
     def worker(self):
         while True:
-            self.reply_and_check(self.queue.get())
+            self.reply_and_check(*self.queue.get())
             self.queue.task_done()
 
-    def reply_and_check(self, to_tweet):
-        # Generate reply
-        replies = self.reply_to(to_tweet)
-        reply = random.choice(replies)
-
+    @staticmethod
+    def reply_and_check(to_tweet, replies, message):
         # ask for confirmation
-        tweet_and_reply = f'\ntweet > {to_tweet}\nreply > {reply}'
-        self._maybe_send_notification('Confirmation required:' + tweet_and_reply)
-        print(tweet_and_reply)
-        confirmation = input('Post this reply? [y/n] > ').lower()
+        print(message)
+        try:
+            i = int(input('Choose your reply > '))
+        except ValueError:
+            i = -1
 
-        if confirmation == 'y':
+        if i in range(len(replies)):
             logging.info(f'[async] Replying to tweet {to_tweet}')
-            post_reply(reply, to_tweet)
+            post_reply(replies[i], to_tweet)
         else:
             logging.info(f'Tweet "{to_tweet}" ignored.')
 
@@ -53,14 +51,19 @@ class CalendaBot:
         response = json.loads(response_bytes)
         to_tweet = Tweet.from_http(response['data'])
 
-        # Check manual confirmation
-        if len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
-            assert self.interactive
-            self.queue.put(to_tweet)
-            return
-
         # Generate reply
         replies = self.reply_to(to_tweet)
+
+        # Check manual confirmation
+        if self.interactive and \
+                len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
+            message = 'Choice required:\n' \
+                      'tweet > {to_tweet}\n' + \
+                      ('\n'.join(f'{i} > {reply}' for i, reply in enumerate(replies)))
+            self._maybe_send_notification(message)
+            self.queue.put((to_tweet, replies, message))
+            return
+
         reply = random.choice(replies)
 
         # Post reply
