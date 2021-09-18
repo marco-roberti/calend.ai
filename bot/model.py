@@ -58,7 +58,7 @@ class CalendaBot:
         if self.interactive and \
                 len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
             message = 'Choice required:\n' \
-                      'tweet > {to_tweet}\n' + \
+                      f'tweet > {to_tweet}\n' + \
                       ('\n'.join(f'{i} > {reply}' for i, reply in enumerate(replies)))
             self._maybe_send_notification(message)
             self.queue.put((to_tweet, replies, message))
