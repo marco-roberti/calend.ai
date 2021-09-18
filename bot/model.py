@@ -74,7 +74,7 @@ class CalendaBot:
             if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
                 reply = re.sub(rf' ?@{username}', '', reply)
         # Remove old-fashioned parties
-        reply = re.sub(r'-?siamoeuropei', '', reply)
+        reply = re.sub(r'[-/]?siamoeuropei', '', reply)
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
