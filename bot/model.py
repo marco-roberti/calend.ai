@@ -17,7 +17,7 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-        self.timeout = args.interactive_timeout
+        self.timeout = args.interactive_timeout if hasattr(args, 'interactive_timeout') else 30
 
     def _confirm_tweet_reply(self, reply, to_tweet):
         try:
