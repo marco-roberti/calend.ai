@@ -7,12 +7,7 @@ from time import sleep, time
 import requests
 
 bearer_token = os.environ.get("BEARER_TOKEN")
-consumer_key = os.environ.get("CONSUMER_KEY")
-consumer_secret = os.environ.get("CONSUMER_SECRET")
 
-access_token_url = "https://api.twitter.com/oauth/access_token"
-request_token_url = "https://api.twitter.com/oauth/request_token"
-base_authorization_url = "https://api.twitter.com/oauth/authorize"
 search_url = 'https://api.twitter.com/2/tweets/search/all'
 tweet_url = 'https://api.twitter.com/2/tweets/'
 profile_url = 'https://api.twitter.com/2/users/'
@@ -71,7 +66,7 @@ def follow_author(tweet):
     logging.info(f'Following {tweet.username}')
 
     response = os.popen(
-        f"twurl -d 'target_user_id={tweet.author_id}' /1.1/friendships/create.json"
+        f"twurl -d 'user_id={tweet.author_id}' /1.1/friendships/create.json"
     ).read()
     response = json.loads(response)
 
