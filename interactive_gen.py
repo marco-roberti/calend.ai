@@ -9,7 +9,7 @@ def main(args):
     bot = CalendaBot(args)
 
     name = input('Display name:\t')
-    username = '@' + input('Username:\t@')
+    username = input('Username:\t@')
     tweet = Tweet('', username, name)
 
     print('From now on, you can write your tweets to @Calend_AI')
