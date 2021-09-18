@@ -70,7 +70,7 @@ def follow_author(tweet):
     ).read()
     response = json.loads(response)
 
-    if response['errors']:
+    if response.get('errors'):
         logging.error(response['errors'])
 
 
