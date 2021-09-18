@@ -5,7 +5,6 @@ from datetime import datetime
 from time import sleep, time
 
 import requests
-from requests_oauthlib import OAuth1Session
 
 bearer_token = os.environ.get("BEARER_TOKEN")
 consumer_key = os.environ.get("CONSUMER_KEY")
@@ -19,21 +18,6 @@ tweet_url = 'https://api.twitter.com/2/tweets/'
 profile_url = 'https://api.twitter.com/2/users/'
 rules_url = "https://api.twitter.com/2/tweets/search/stream/rules"
 following_url = 'https://api.twitter.com/2/users/1438223629456662543/following'
-
-# Get request token
-oauth_keys = OAuth1Session(consumer_key, client_secret=consumer_secret)
-try:
-    fetch_response = oauth_keys.fetch_request_token(request_token_url)
-except ValueError:
-    print("There may have been an issue with the consumer_key or consumer_secret you entered.")
-    fetch_response = None
-if fetch_response:
-    resource_owner_key = fetch_response.get("oauth_token")
-    resource_owner_secret = fetch_response.get("oauth_token_secret")
-    # Get authorization
-    authorization_url = oauth_keys.authorization_url(base_authorization_url)
-    print("Please go here and authorize: %s" % authorization_url)
-    verifier = input("Paste the PIN here: ")
 
 
 def bearer_oauth(r):
@@ -83,39 +67,16 @@ def post_reply(reply, to_tweet):
         logging.error(response)
 
 
-def get_oauth_access():
-    # Get the access token
-    oauth = OAuth1Session(
-        consumer_key,
-        client_secret=consumer_secret,
-        resource_owner_key=resource_owner_key,
-        resource_owner_secret=resource_owner_secret,
-        verifier=verifier,
-    )
-
-    oauth_tokens = oauth.fetch_access_token(access_token_url)
-    return oauth_tokens["oauth_token"], oauth_tokens["oauth_token_secret"]
-
-
 def follow_author(tweet):
     logging.info(f'Following {tweet.username}')
 
-    # Authenticating
-    access_token, access_token_secret = get_oauth_access()
-    oauth = OAuth1Session(
-        consumer_key,
-        client_secret=consumer_secret,
-        resource_owner_key=access_token,
-        resource_owner_secret=access_token_secret
-    )
+    response = os.popen(
+        f"twurl -d 'target_user_id={tweet.author_id}' /1.1/friendships/create.json"
+    ).read()
+    response = json.loads(response)
 
-    # Making the request
-    payload = {
-        "target_user_id": tweet.author_id
-    }
-    response = oauth.post(following_url, json=payload)
-    assert response.status_code == 200, \
-        f'Cannot follow @{tweet.username} (HTTP {response.status_code}): {response.text}'
+    if response['errors']:
+        logging.error(response['errors'])
 
 
 class Tweet:
