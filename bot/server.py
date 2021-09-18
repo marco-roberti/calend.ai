@@ -10,8 +10,8 @@ def main(args):
 
     stream = Stream([
         {"value": "@Calend_AI -is:retweet -is:reply"},
-        {"value": "(#Calenda OR #CalendaSindaco OR #RomaSulSerio) "
-                  "-is:retweet -is:reply -has:links -has:media -has:mentions", "tag": "confirm"}
+        {"value": "(Calenda OR #CalendaSindaco OR #RomaSulSerio) "
+                  "-is:retweet -is:reply -has:links", "tag": "confirm"}
     ])
     stream.watch(handler=bot.on_quote)
 
