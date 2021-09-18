@@ -8,7 +8,7 @@ from threading import Thread
 import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
-from twitter import post_reply, Tweet
+from twitter import post_reply, Tweet, follow_author
 
 
 class CalendaBot:
@@ -26,10 +26,26 @@ class CalendaBot:
             self.queue = Queue()
             Thread(target=self.worker, daemon=True).start()
 
-    def worker(self):
-        while True:
-            self.reply_and_check(*self.queue.get())
-            self.queue.task_done()
+    @staticmethod
+    def post_process(reply, to_tweet):
+        # Remove unrelated mentions
+        re_username = r'@([a-zA-Z0-9_]+)'
+        for username in re.findall(re_username, reply):
+            if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
+                reply = re.sub(rf' ?@{username}', '', reply)
+        # Remove old-fashioned parties
+        reply = re.sub(r'[-/]?siamoeuropei', '', reply)
+        # Ensure mention
+        if f'@{to_tweet.username.lower()}' not in reply:
+            reply = f'@{to_tweet.username.lower()} {reply.strip()}'
+        return reply.strip()
+
+    @staticmethod
+    def _maybe_send_notification(message):
+        try:
+            telegram_send.send(messages=[message])
+        except Exception as e:
+            logging.warning(f"Couldn't send Telegram notification: {e}")
 
     @staticmethod
     def reply_and_check(to_tweet, replies, message):
@@ -46,10 +62,19 @@ class CalendaBot:
         else:
             logging.info(f'Tweet "{to_tweet}" ignored.')
 
+    def worker(self):
+        while True:
+            self.reply_and_check(*self.queue.get())
+            self.queue.task_done()
+
     def on_quote(self, response_bytes):
         # Parse HTTP response
         response = json.loads(response_bytes)
         to_tweet = Tweet.from_http(response['data'])
+
+        # Follow back ;)
+        if any('confirm' in rule['tag'] for rule in response['matching_rules']):
+            follow_author(to_tweet)
 
         # Generate reply
         replies = self.reply_to(to_tweet)
@@ -57,7 +82,7 @@ class CalendaBot:
         # Check manual confirmation
         if self.interactive and \
                 len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
-            message = 'Choice required:\n' \
+            message = '\nChoice required:\n' \
                       f'tweet > {to_tweet}\n' + \
                       ('\n'.join(f'{i} > {reply}' for i, reply in enumerate(replies)))
             self._maybe_send_notification(message)
@@ -92,24 +117,3 @@ class CalendaBot:
             v = input(f'{i}. {k}\t= ')
             self.gen_args[k] = type(self.gen_args[k])(v)
             print()
-
-    @staticmethod
-    def post_process(reply, to_tweet):
-        # Remove unrelated mentions
-        re_username = r'@([a-zA-Z0-9_]+)'
-        for username in re.findall(re_username, reply):
-            if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
-                reply = re.sub(rf' ?@{username}', '', reply)
-        # Remove old-fashioned parties
-        reply = re.sub(r'[-/]?siamoeuropei', '', reply)
-        # Ensure mention
-        if f'@{to_tweet.username.lower()}' not in reply:
-            reply = f'@{to_tweet.username.lower()} {reply.strip()}'
-        return reply.strip()
-
-    @staticmethod
-    def _maybe_send_notification(message):
-        try:
-            telegram_send.send(messages=[message])
-        except Exception as e:
-            logging.warning(f"Couldn't send Telegram notification: {e}")

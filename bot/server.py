@@ -9,11 +9,11 @@ def main(args):
     bot = CalendaBot(args, interactive=True)
 
     stream = Stream([
-        {"value": "@Calend_AI -is:retweet -is:reply -has:links"},
+        {"value": "@Calend_AI -is:retweet -is:reply -has:links", "tag": "qt_follow"},
         {"value": "(Calenda OR #CalendaSindaco OR #RomaSulSerio) "
-                  "-is:retweet -is:reply -has:links", "tag": "confirm_ht"},
+                  "-is:retweet -is:reply -has:links", "tag": "ht_confirm_follow"},
         {"value": "(from:virginiaraggi OR from:gualtierieurope OR from:EnricoMichetti) "
-                  "-is:retweet -is:reply -has:links", "tag": "confirm_cd"}
+                  "-is:retweet -is:reply -has:links", "tag": "cd_confirm"}
     ])
     stream.watch(handler=bot.on_quote)
 
