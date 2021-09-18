@@ -70,7 +70,7 @@ class CalendaBot:
         replies = self.model.generate(**text, **self.gen_args)
         replies = self.tokenizer.batch_decode(replies, skip_special_tokens=True)
         return list(filter(
-            lambda reply: reply.strip() != f'@{tweet.username}',
+            lambda reply: reply != f'@{tweet.username}',
             set(self.post_process(reply, tweet) for reply in replies)
         ))
 
@@ -99,4 +99,4 @@ class CalendaBot:
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
-        return reply
+        return reply.strip()
