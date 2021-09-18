@@ -70,6 +70,9 @@ class Tweet:
         self.name = name
         self.id = tweet_id
 
+    def __str__(self) -> str:
+        return f'{self.name} @{self.username} : {self.text}'
+
     @classmethod
     def from_http(cls, http_response):
         username, name = get_tweet_author(http_response['id'])
@@ -92,7 +95,7 @@ class Stream:
         response = requests.get(rules_url, auth=bearer_oauth)
         assert response.status_code == 200, f'Cannot get rules (HTTP {response.status_code}): {response.text}'
         response = response.json()
-        assert len(response['data']) == 1
+        logging.info(f'Got rules: {response}')
         return response
 
     @staticmethod

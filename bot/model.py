@@ -3,6 +3,7 @@ import logging
 import random
 import re
 
+from inputimeout import inputimeout, TimeoutOccurred
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from twitter import post_reply, Tweet
@@ -16,20 +17,41 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+        self.timeout = args.interactive_timeout
+
+    def _confirm_tweet_reply(self, reply, to_tweet):
+        try:
+            # ask for confirmation with timeout
+            print(f'\ntweet > {to_tweet}')
+            print(f'reply > {reply}')
+            return inputimeout('Post this reply? [y/n] > ', self.timeout).lower() == 'y'
+        except TimeoutOccurred:
+            return False
 
     def on_quote(self, response_bytes):
-        logging.info(f'Replying to tweet {response_bytes}')
-        to_tweet = Tweet.from_http(json.loads(response_bytes)['data'])
+        # Parse HTTP response
+        response = json.loads(response_bytes)
+        # Generate reply
+        to_tweet = Tweet.from_http(response['data'])
         replies = self.reply_to(to_tweet)
         reply = random.choice(replies)
+        # Some tweets' answers needs to be manually confirmed
+        if len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
+            if not self._confirm_tweet_reply(reply, to_tweet):
+                logging.info('Tweet ignored.')
+                return
+        # Post reply
+        logging.info(f'Replying to tweet {response}')
         post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):
-        text = f'{tweet.name} {tweet.username} : {tweet.text}'
-        text = self.tokenizer(text, return_tensors='pt')
+        text = self.tokenizer(str(tweet), return_tensors='pt')
         replies = self.model.generate(**text, **self.gen_args)
         replies = self.tokenizer.batch_decode(replies, skip_special_tokens=True)
-        return list(set(self.post_process(reply, tweet) for reply in replies))
+        return list(filter(
+            lambda reply: reply.strip() != f'@{tweet.username}',
+            set(self.post_process(reply, tweet) for reply in replies)
+        ))
 
     def interactive_set_args(self):
         while True:
