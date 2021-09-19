@@ -30,7 +30,7 @@ def process_tweet(response_tweet):
         return None, response_tweet['created_at']
     input_tweet = input_tweet['data']
     # Exclude self-answers and answers to tweet with media
-    if input_tweet['author_id'] == profile_id or 'attachments' not in input_tweet:
+    if input_tweet['author_id'] == profile_id or 'attachments' in input_tweet:
         return None, response_tweet['created_at']
     # Get input tweet's username
     username, name = get_profile_data(input_tweet['author_id'])
