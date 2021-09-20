@@ -38,7 +38,7 @@ class CalendaBot:
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
-        return reply.strip()
+        return reply.strip()[:280]
 
     @staticmethod
     def _maybe_send_notification(message):
