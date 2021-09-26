@@ -78,6 +78,9 @@ class CalendaBot:
 
         # Generate reply
         replies = self.reply_to(to_tweet)
+        if not replies:
+            logging.error('No valid reply generated!')
+            return
 
         # Check manual confirmation
         if self.interactive and \
