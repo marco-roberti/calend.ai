@@ -93,7 +93,7 @@ class Tweet:
 
     @classmethod
     def from_str(cls, str_tweet):
-        name, username, text = re.search(r'([a-zA-Z]+) @([a-zA-Z]+) : (.+)', str_tweet).groups()
+        name, username, text = re.search(r'(.+) @([A-Za-z0-9_]+) : (.+)', str_tweet).groups()
         return cls(text, username, name)
 
 
