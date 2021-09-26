@@ -17,7 +17,7 @@ def main(args):
             print(f'inp> {inp}')
             print(f'ref> {ref}')
             for answer in answers:
-                print(f'ref> {answer}')
+                print(f'gen> {answer}')
             print()
             if input():
                 bot.interactive_set_args()
