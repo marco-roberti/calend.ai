@@ -8,7 +8,7 @@ from bot.model import CalendaBot
 def main(args):
     bot = CalendaBot(args)
 
-    with open(args.filename) as f:
+    with open(args.test_file) as f:
         for line in f:
             example = json.loads(line)
             inp, ref = example['input'], example['output']
