@@ -21,7 +21,7 @@ def main(args):
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.INFO)
 
-    parser = ArgumentParser('Automatic reply to tweets mentioning @Calend_AI')
+    parser = ArgumentParser(description='Automatic reply to tweets mentioning @Calend_AI')
     parser.add_argument('model_path')
     parser.add_argument('config_file')
     parser.add_argument('--interactive_timeout', '-t', type=int, default=30,

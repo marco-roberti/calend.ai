@@ -24,7 +24,7 @@ def main(args):
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, lambda signum, frame: exit())
-    parser = ArgumentParser('Interactive test of @Calend_AI\'s response tweets')
+    parser = ArgumentParser(description='Interactive test of @Calend_AI\'s response tweets')
     parser.add_argument('model_path')
     parser.add_argument('config_file')
     parser.add_argument('--test_file', default='data/test.json')
