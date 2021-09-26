@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 from datetime import datetime
 from time import sleep, time
 
@@ -89,6 +90,11 @@ class Tweet:
     def from_http(cls, http_response):
         username, name, author_id = get_tweet_author(http_response['id'])
         return cls(http_response['text'], username, name, tweet_id=http_response['id'], author_id=author_id)
+
+    @classmethod
+    def from_str(cls, str_tweet):
+        name, username, text = re.search(r'([a-zA-Z]+) @([a-zA-Z]+) : (.+)', str_tweet).groups()
+        return cls(text, username, name)
 
 
 class Stream:

@@ -3,6 +3,7 @@ import signal
 from argparse import ArgumentParser
 
 from bot.model import CalendaBot
+from twitter import Tweet
 
 
 def main(args):
@@ -12,7 +13,7 @@ def main(args):
         for line in f:
             example = json.loads(line)
             inp, ref = example['input'], example['output']
-            answers = bot.reply_to(inp)
+            answers = bot.reply_to(Tweet.from_str(inp))
             print(f'inp> {inp}')
             print(f'ref> {ref}')
             for answer in answers:
