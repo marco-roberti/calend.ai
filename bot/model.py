@@ -73,8 +73,12 @@ class CalendaBot:
         to_tweet = Tweet.from_http(response['data'])
 
         # Follow back ;)
-        if any('confirm' in rule['tag'] for rule in response['matching_rules']):
+        if any('follow' in rule['tag'] for rule in response['matching_rules']):
             follow_author(to_tweet)
+
+        # Check if reply is needed
+        if not any('reply' in rule['tag'] for rule in response['matching_rules']):
+            return
 
         # Generate reply
         replies = self.reply_to(to_tweet)
@@ -83,8 +87,7 @@ class CalendaBot:
             return
 
         # Check manual confirmation
-        if self.interactive and \
-                len(response['matching_rules']) == 1 and 'confirm' in response['matching_rules'][0]['tag']:
+        if self.interactive and all('confirm' in rule['tag'] for rule in response['matching_rules']):
             message = '\nChoice required:\n' \
                       f'tweet > {to_tweet}\n' + \
                       ('\n'.join(f'{i} > {reply}' for i, reply in enumerate(replies)))
