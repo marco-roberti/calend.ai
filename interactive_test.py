@@ -1,4 +1,5 @@
 import json
+import random
 import signal
 from argparse import ArgumentParser
 
@@ -10,7 +11,9 @@ def main(args):
     bot = CalendaBot(args)
 
     with open(args.test_file) as f:
-        for line in f:
+        lines = f.readlines()
+        random.shuffle(lines)
+        for line in lines:
             example = json.loads(line)
             inp, ref = example['input'], example['output']
             answers = bot.reply_to(Tweet.from_str(inp))
