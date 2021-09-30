@@ -22,7 +22,7 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-        self.hashtags = HASHTAGS
+        self.hashtags = HASHTAGS.copy()
 
         self.interactive = interactive
         if self.interactive:
@@ -46,7 +46,7 @@ class CalendaBot:
         # Add hashtags if possibile
         while self.hashtags and len(reply) + len(self.hashtags[-1]) < MAX_LENGTH:
             reply += self.hashtags.pop()
-        self.hashtags = HASHTAGS
+        self.hashtags = HASHTAGS.copy()
         return reply.strip()
 
     @staticmethod

@@ -4,7 +4,7 @@ from typing import List
 import stanza
 
 stanza.download('it')
-analyze = stanza.Pipeline('it', processors='tokenize, mwt, pos')
+analyze = stanza.Pipeline('it', processors='tokenize, mwt, pos', use_gpu=False)
 
 
 def truecase(tweet):
