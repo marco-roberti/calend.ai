@@ -15,7 +15,11 @@ def main(args):
         {"value": "(from:virginiaraggi OR from:gualtierieurope OR from:EnricoMichetti) "
                   "-is:retweet -is:reply -has:links", "tag": "cd_reply"}
     ])
-    stream.watch(handler=bot.on_quote)
+    while True:
+        try:
+            stream.watch(handler=bot.on_quote)
+        except ConnectionError:
+            continue
 
 
 if __name__ == '__main__':
