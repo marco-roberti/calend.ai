@@ -10,7 +10,6 @@ analyze = stanza.Pipeline('it', processors='tokenize, mwt, pos')
 def truecase(tweet):
     doc = analyze(tweet)
     tweet: List = list(tweet)
-    print(' '.join(f'{w.text}|{w.upos}' for sentence in doc.sentences for w in sentence.words))
     for sentence in doc.sentences:
         for i, token in enumerate(sentence.tokens):
             if i == 0 or any(w.upos in ['PROPN', 'X'] for w in token.words):
