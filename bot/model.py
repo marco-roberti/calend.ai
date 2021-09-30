@@ -8,6 +8,7 @@ from threading import Thread
 import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
+from truecase import truecase
 from twitter import post_reply, Tweet, follow_author
 
 
@@ -96,6 +97,7 @@ class CalendaBot:
             return
 
         reply = random.choice(replies)
+        reply = truecase(reply)
 
         # Post reply
         logging.info(f'[sync] Replying to tweet {to_tweet}')
