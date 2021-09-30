@@ -36,6 +36,8 @@ class CalendaBot:
                 reply = re.sub(rf' ?@{username}', '', reply)
         # Remove old-fashioned parties
         reply = re.sub(r'[-/]?siamoeuropei', '', reply)
+        # Truecase
+        reply = truecase(reply)
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
@@ -97,7 +99,6 @@ class CalendaBot:
             return
 
         reply = random.choice(replies)
-        reply = truecase(reply)
 
         # Post reply
         logging.info(f'[sync] Replying to tweet {to_tweet}')
