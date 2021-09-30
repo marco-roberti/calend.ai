@@ -8,6 +8,7 @@ from time import sleep, time
 import requests
 
 bearer_token = os.environ.get("BEARER_TOKEN")
+MAX_LENGTH = 280
 
 search_url = 'https://api.twitter.com/2/tweets/search/all'
 tweet_url = 'https://api.twitter.com/2/tweets/'

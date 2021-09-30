@@ -9,7 +9,9 @@ import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from truecase import truecase
-from twitter import post_reply, Tweet, follow_author
+from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
+
+HASHTAGS = [' #Calenda', ' #RomaSulSerio', ' #CalendaSindaco']
 
 
 class CalendaBot:
@@ -20,6 +22,7 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+        self.hashtags = HASHTAGS
 
         self.interactive = interactive
         if self.interactive:
@@ -27,8 +30,7 @@ class CalendaBot:
             self.queue = Queue()
             Thread(target=self.worker, daemon=True).start()
 
-    @staticmethod
-    def post_process(reply, to_tweet):
+    def post_process(self, reply, to_tweet):
         # Remove unrelated mentions
         re_username = r'@([a-zA-Z0-9_]+)'
         for username in re.findall(re_username, reply):
@@ -41,6 +43,10 @@ class CalendaBot:
         # Ensure mention
         if f'@{to_tweet.username.lower()}' not in reply:
             reply = f'@{to_tweet.username.lower()} {reply.strip()}'
+        # Add hashtags if possibile
+        while self.hashtags and len(reply) + len(self.hashtags[-1]) < MAX_LENGTH:
+            reply += self.hashtags.pop()
+        self.hashtags = HASHTAGS
         return reply.strip()
 
     @staticmethod
@@ -110,7 +116,7 @@ class CalendaBot:
         replies = self.model.generate(**text, **self.gen_args)
         replies = self.tokenizer.batch_decode(replies, skip_special_tokens=True)
         return list(filter(
-            lambda reply: reply != f'@{tweet.username}' and len(reply) <= 280,
+            lambda reply: reply != f'@{tweet.username}' and len(reply) <= MAX_LENGTH,
             set(self.post_process(reply, tweet) for reply in replies)
         ))
 
