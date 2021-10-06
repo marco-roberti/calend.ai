@@ -162,6 +162,6 @@ class Stream:
         assert stream.status_code == 200, f'Cannot get stream (HTTP {stream.status_code}): {stream.text}'
         for response in stream.iter_lines():
             if response:
-                if 'errors' in response:
-                    raise ConnectionError(response['errors'])
+                if 'errors' in json.loads(response):
+                    raise ConnectionError(json.loads(response)['errors'])
                 handler(response)
