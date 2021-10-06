@@ -18,7 +18,7 @@ def main(args):
     while True:
         try:
             stream.watch(handler=bot.on_quote)
-        except ConnectionError:
+        except (ConnectionError, KeyError):
             continue
 
 
