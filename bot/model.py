@@ -11,7 +11,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from truecase import truecase
 from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
 
-HASHTAGS = [' #Calenda', ' #RomaSulSerio', ' #CalendaSindaco']
+HASHTAGS = [' #CalendaSindaco', ' #RomaSulSerio', ' #Calenda']
 
 
 class CalendaBot:
@@ -40,9 +40,9 @@ class CalendaBot:
         reply = re.sub(r'[-/]?siamoeuropei', '', reply)
         # Truecase
         reply = truecase(reply)
-        # Ensure mention
-        if f'@{to_tweet.username.lower()}' not in reply:
-            reply = f'@{to_tweet.username.lower()} {reply.strip()}'
+        # Ensure mention (not needed anymore)
+        # if f'@{to_tweet.username.lower()}' not in reply:
+        #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         # Add hashtags if possibile
         while self.hashtags and len(reply) + len(self.hashtags[-1]) < MAX_LENGTH:
             reply += self.hashtags.pop()
