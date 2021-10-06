@@ -55,7 +55,7 @@ def post_reply(reply, to_tweet):
     logging.info(f'Posting tweet >>> {reply}')
     reply = reply.replace("'", "’")
     response = os.popen(
-        f"twurl -d 'status={reply}&in_reply_to_status_id={to_tweet.tweet_id}' /1.1/statuses/update.json"
+        f"twurl -d 'status={reply}&attachment_url={to_tweet.url}' /1.1/statuses/update.json"
     ).read()
     response = json.loads(response)
     if reply_id := response.get('id_str', None):
@@ -86,6 +86,10 @@ class Tweet:
 
     def __str__(self) -> str:
         return f'{self.name} @{self.username} : {self.text}'
+
+    @property
+    def url(self):
+        return f'https://twitter.com/{self.username}/status/{self.tweet_id}'
 
     @classmethod
     def from_http(cls, http_response):
