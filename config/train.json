@@ -1,6 +1,4 @@
 {
-  "overwrite_output_dir": true,
-  "max_train_samples": 100,
   "model_name_or_path": "gsarti/it5-base",
   "log_level": "info",
   "train_file": "data/train.json",
