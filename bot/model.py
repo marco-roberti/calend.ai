@@ -30,7 +30,6 @@ class CalendaBot:
             self.gen_args['bad_words_ids'] = [
                 self.tokenizer(bad_words).input_ids for bad_words in blacklist_str
             ]
-            breakpoint()
 
         self.interactive = interactive
         if self.interactive:
