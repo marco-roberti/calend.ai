@@ -1,0 +1,15 @@
+5s e m5s
+5s, lega e m5s
+5s, lega o m5s
+5s, m5s
+5s, pd e m5s
+5s, pd o m5s
+m5s e 5s
+m5s, lega e 5s
+m5s, lega e movimento 5s
+m5s, lega o 5s
+m5s, lega o movimento 5s
+m5s, pd e 5s
+m5s, pd e movimento 5s
+m5s, pd o 5s
+m5s, pd o movimento 5s

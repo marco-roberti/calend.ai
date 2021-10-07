@@ -29,4 +29,5 @@ if __name__ == '__main__':
     parser = ArgumentParser(description='Interactive generation of @Calend_AI\'s response tweets')
     parser.add_argument('model_path')
     parser.add_argument('config_file')
+    parser.add_argument('--blacklist', '-b', default=None)
     main(parser.parse_args())

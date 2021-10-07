@@ -24,6 +24,14 @@ class CalendaBot:
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
         self.hashtags = HASHTAGS.copy()
 
+        if args.blacklist:
+            with open(args.blacklist) as f:
+                blacklist_str = [line.strip() for line in f]
+            self.gen_args['bad_words_ids'] = [
+                self.tokenizer(bad_words).input_ids for bad_words in blacklist_str
+            ]
+            breakpoint()
+
         self.interactive = interactive
         if self.interactive:
             # Some tweets' answers needs to be manually confirmed. This is done in a separate thread

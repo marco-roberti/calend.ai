@@ -76,6 +76,18 @@ def follow_author(tweet):
         logging.error(response['errors'])
 
 
+def _get_tweet_from_id(tweet_id):
+    logging.info(f'Getting tweet with ID {tweet_id}')
+    resp = connect_to_endpoint(tweet_url + tweet_id, {'expansions': 'author_id'})
+    return Tweet(
+        text=resp['data']['text'],
+        username=resp['includes']['users'][0]['username'],
+        name=resp['includes']['users'][0]['name'],
+        tweet_id=resp['data']['id'],
+        author_id=resp['data']['author_id']
+    )
+
+
 class Tweet:
     def __init__(self, text, username, name, tweet_id=None, author_id=None):
         self.text = text
@@ -90,6 +102,10 @@ class Tweet:
     @property
     def url(self):
         return f'https://twitter.com/{self.username}/status/{self.tweet_id}'
+
+    @classmethod
+    def from_id(cls, tweet_id):
+        return _get_tweet_from_id(tweet_id)
 
     @classmethod
     def from_http(cls, http_response):
