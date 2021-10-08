@@ -8,7 +8,7 @@ from threading import Thread
 import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
-from truecase import truecase
+from truecasing import truecase
 from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
 
 
