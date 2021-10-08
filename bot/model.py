@@ -55,13 +55,6 @@ class CalendaBot:
         return reply.strip()
 
     @staticmethod
-    def _maybe_send_notification(message):
-        try:
-            telegram_send.send(messages=[message])
-        except Exception as e:
-            logging.warning(f"Couldn't send Telegram notification: {e}")
-
-    @staticmethod
     def reply_and_check(to_tweet, replies, message):
         # ask for confirmation
         print(message)
@@ -105,7 +98,7 @@ class CalendaBot:
             message = '\nChoice required:\n' \
                       f'tweet > {to_tweet}\n' + \
                       ('\n'.join(f'{i} > {reply}' for i, reply in enumerate(replies)))
-            self._maybe_send_notification(message)
+            maybe_send_notification(message)
             self.queue.put((to_tweet, replies, message))
             return
 
@@ -113,7 +106,6 @@ class CalendaBot:
 
         # Post reply
         logging.info(f'[sync] Replying to tweet {to_tweet}')
-        self._maybe_send_notification(f'New reply sent:\ntweet > {to_tweet}\nreply > {reply}')
         post_reply(reply, to_tweet)
 
     def reply_to(self, tweet: Tweet):
@@ -137,3 +129,10 @@ class CalendaBot:
             v = input(f'{i}. {k}\t= ')
             self.gen_args[k] = type(self.gen_args[k])(v)
             print()
+
+
+def maybe_send_notification(message):
+    try:
+        telegram_send.send(messages=[message])
+    except Exception as e:
+        logging.warning(f"Couldn't send Telegram notification: {e}")

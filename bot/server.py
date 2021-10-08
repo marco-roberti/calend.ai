@@ -3,6 +3,7 @@ import time
 import traceback
 from argparse import ArgumentParser
 
+from bot.model import maybe_send_notification
 from model import CalendaBot
 from twitter import Stream
 
@@ -18,6 +19,7 @@ def main(args):
             stream.watch(handler=bot.on_quote)
         except Exception:
             print(traceback.format_exc())
+            maybe_send_notification(traceback.format_exc())
             time.sleep(30)
             continue
 
