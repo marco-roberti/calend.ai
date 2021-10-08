@@ -108,6 +108,10 @@ class Tweet:
     def url(self):
         return f'https://twitter.com/{self.username}/status/{self.tweet_id}'
 
+    @property
+    def hashtags(self):
+        return [' ' + ht for ht in re.findall(r'#[a-zA-Z0-9_]+', self.text)]
+
     @classmethod
     def from_id(cls, tweet_id):
         return _get_tweet_from_id(tweet_id)

@@ -11,10 +11,10 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from truecase import truecase
 from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
 
-HASHTAGS = [' #Calenda', ' #CalendAI']
-
 
 class CalendaBot:
+    HASHTAGS = [' #Calenda', ' #CalendAI']
+
     def __init__(self, args, interactive=False):
         with open(args.config_file) as f:
             self.gen_args = json.load(f)
@@ -22,7 +22,6 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-        self.hashtags = HASHTAGS.copy()
 
         if args.blacklist:
             with open(args.blacklist) as f:
@@ -43,17 +42,16 @@ class CalendaBot:
         for username in re.findall(re_username, reply):
             if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
                 reply = re.sub(rf' ?@{username}', '', reply)
-        # Remove old-fashioned parties
-        reply = re.sub(r'[-/]?siamoeuropei', '', reply)
         # Truecase
         reply = truecase(reply)
         # Ensure mention (not needed anymore)
         # if f'@{to_tweet.username.lower()}' not in reply:
         #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         # Add hashtags if possibile
-        while self.hashtags and len(reply) + len(self.hashtags[-1]) < MAX_LENGTH:
-            reply += self.hashtags.pop()
-        self.hashtags = HASHTAGS.copy()
+        hashtags = list(set(self.HASHTAGS + to_tweet.hashtags))
+        random.shuffle(hashtags)
+        while hashtags and len(reply) + len(hashtags[-1]) < MAX_LENGTH:
+            reply += hashtags.pop()
         return reply.strip()
 
     @staticmethod
