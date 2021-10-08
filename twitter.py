@@ -27,14 +27,19 @@ def bearer_oauth(r):
 
 
 # noinspection PyProtectedMember
-# noinspection PyUnresolvedReferences
-def connect_to_endpoint(url, params):
-    response = requests.request("GET", url, auth=bearer_oauth, params=params)
-    assert response.status_code == 200, (response.status_code, response.text)
+def _check_rate_limit(response):
     if int(response.headers._store['x-rate-limit-remaining'][1]) <= 1:
         # Avoiding HTTP response 429 (Rate limit exceeded)
         print('sleeping until ' + str(datetime.fromtimestamp(int(response.headers._store['x-rate-limit-reset'][1]))))
         sleep(1 + int(response.headers._store['x-rate-limit-reset'][1]) - time())
+
+
+# noinspection PyProtectedMember
+# noinspection PyUnresolvedReferences
+def connect_to_endpoint(url, params):
+    response = requests.request("GET", url, auth=bearer_oauth, params=params)
+    assert response.status_code == 200, (response.status_code, response.text)
+    _check_rate_limit(response)
     return response.json()
 
 
@@ -133,6 +138,7 @@ class Stream:
         logging.info('Getting stream rules')
         response = requests.get(rules_url, auth=bearer_oauth)
         assert response.status_code == 200, f'Cannot get rules (HTTP {response.status_code}): {response.text}'
+        _check_rate_limit(response)
         response = response.json()
         logging.info(f'Got rules: {response}')
         return response
@@ -151,6 +157,7 @@ class Stream:
             json=payload
         )
         assert response.status_code == 200, f'Cannot delete rules (HTTP {response.status_code}): {response.text}'
+        _check_rate_limit(response)
         response = response.json()
         assert response['meta']['summary']['not_deleted'] == 0, \
             f"{response['meta']['summary']['not_deleted']} rules have not been deleted!"
@@ -165,6 +172,7 @@ class Stream:
             json=payload,
         )
         assert response.status_code == 201, f'Cannot add rules (HTTP {response.status_code}): {response.text}'
+        _check_rate_limit(response)
         response = response.json()
         assert response['meta']['summary']['not_created'] == 0, \
             f"{response['meta']['summary']['not_created']} rules have not been created!"
@@ -176,6 +184,7 @@ class Stream:
             "https://api.twitter.com/2/tweets/search/stream", auth=bearer_oauth, stream=True,
         )
         assert stream.status_code == 200, f'Cannot get stream (HTTP {stream.status_code}): {stream.text}'
+        _check_rate_limit(stream)
         for response in stream.iter_lines():
             if response:
                 if 'errors' in json.loads(response):

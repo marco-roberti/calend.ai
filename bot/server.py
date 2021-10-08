@@ -1,4 +1,6 @@
 import logging
+import time
+import traceback
 from argparse import ArgumentParser
 
 from model import CalendaBot
@@ -9,16 +11,14 @@ def main(args):
     bot = CalendaBot(args, interactive=True)
 
     stream = Stream([
-        {"value": "@Calend_AI -is:retweet -is:reply -has:links", "tag": "qt_follow_reply"},
-        {"value": "(Calenda OR #CalendaSindaco OR #RomaSulSerio) "
-                  "-is:retweet -is:reply -has:links", "tag": "ht_follow"},
-        {"value": "(from:virginiaraggi OR from:gualtierieurope OR from:EnricoMichetti) "
-                  "-is:retweet -is:reply -has:links", "tag": "cd_reply"}
+        {"value": "@Calend_AI -is:retweet -is:reply -has:links", "tag": "qt_reply"}
     ])
     while True:
         try:
             stream.watch(handler=bot.on_quote)
-        except (ConnectionError, KeyError):
+        except Exception:
+            print(traceback.format_exc())
+            time.sleep(30)
             continue
 
 

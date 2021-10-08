@@ -11,7 +11,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from truecase import truecase
 from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
 
-HASHTAGS = [' #CalendaSindaco', ' #RomaSulSerio', ' #Calenda']
+HASHTAGS = [' #Calenda', ' #CalendAI']
 
 
 class CalendaBot:
