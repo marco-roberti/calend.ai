@@ -27,7 +27,7 @@ class CalendaBot:
             with open(args.blacklist) as f:
                 blacklist_str = [line.strip() for line in f]
             self.gen_args['bad_words_ids'] = [
-                self.tokenizer(bad_words).input_ids for bad_words in blacklist_str
+                self.tokenizer(bad_words).input_ids[:-1] for bad_words in blacklist_str
             ]
 
         self.interactive = interactive
