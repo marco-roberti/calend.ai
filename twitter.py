@@ -69,7 +69,7 @@ def get_trends():
         lambda ht: ht.startswith('#'),
         [x['name'] for x in response[0]['trends']]
     )
-    trends = map(lambda ht: ' ' + ht, trends)
+    trends = list(map(lambda ht: ' ' + ht, trends))
     return list(reversed(trends))
 
 
