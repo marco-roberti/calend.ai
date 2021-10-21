@@ -2,6 +2,7 @@ import json
 import logging
 import random
 import re
+from datetime import datetime, timedelta
 from queue import Queue
 from threading import Thread
 
@@ -9,11 +10,11 @@ import telegram_send
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 from truecasing import truecase
-from twitter import post_reply, Tweet, follow_author, MAX_LENGTH
+from twitter import post_reply, Tweet, follow_author, MAX_LENGTH, get_trends
 
 
 class CalendaBot:
-    HASHTAGS = [' #Calenda', ' #CalendAI']
+    FIXED_HASHTAGS = [' #Calenda', ' #CalendAI']
 
     def __init__(self, args, interactive=False):
         with open(args.config_file) as f:
@@ -22,6 +23,9 @@ class CalendaBot:
         model_path = args.model_path
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+
+        self._hashtags = []
+        self._hashtags_updated = datetime.fromtimestamp(0)
 
         if args.blacklist:
             with open(args.blacklist) as f:
@@ -34,25 +38,22 @@ class CalendaBot:
         if self.interactive:
             # Some tweets' answers needs to be manually confirmed. This is done in a separate thread
             self.queue = Queue()
-            Thread(target=self.worker, daemon=True).start()
+            Thread(target=self._worker, daemon=True).start()
 
-    def post_process(self, reply, to_tweet):
-        # Remove unrelated mentions
-        re_username = r'@([a-zA-Z0-9_]+)'
-        for username in re.findall(re_username, reply):
-            if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
-                reply = re.sub(rf' ?@{username}', '', reply)
-        # Truecase
-        reply = truecase(reply)
-        # Ensure mention (not needed anymore)
-        # if f'@{to_tweet.username.lower()}' not in reply:
-        #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
-        # Add hashtags if possibile
-        hashtags = list(set(self.HASHTAGS + to_tweet.hashtags))
-        random.shuffle(hashtags)
-        while hashtags and len(reply) + len(hashtags[-1]) < MAX_LENGTH:
-            reply += hashtags.pop()
-        return reply.strip()
+    @property
+    def hashtags(self):
+        if datetime.now() - self._hashtags_updated > timedelta(minutes=30):
+            self._update_hashtags()
+        return self._hashtags
+
+    def _update_hashtags(self):
+        self._hashtags = self.FIXED_HASHTAGS + get_trends()
+        self._hashtags_updated = datetime.now()
+
+    def _worker(self):
+        while True:
+            self.reply_and_check(*self.queue.get())
+            self.queue.task_done()
 
     @staticmethod
     def reply_and_check(to_tweet, replies, message):
@@ -69,10 +70,22 @@ class CalendaBot:
         else:
             logging.info(f'Tweet "{to_tweet}" ignored.')
 
-    def worker(self):
-        while True:
-            self.reply_and_check(*self.queue.get())
-            self.queue.task_done()
+    def post_process(self, reply, to_tweet):
+        # Remove unrelated mentions
+        re_username = r'@([a-zA-Z0-9_]+)'
+        for username in re.findall(re_username, reply):
+            if username not in [to_tweet.username.lower()] + re.findall(re_username, to_tweet.text):
+                reply = re.sub(rf' ?@{username}', '', reply)
+        # Truecase
+        reply = truecase(reply)
+        # Ensure mention (not needed anymore) TODO add a reply vs quote option
+        # if f'@{to_tweet.username.lower()}' not in reply:
+        #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
+        # Add hashtags if possibile
+        hashtags = to_tweet.hashtags + self.hashtags
+        while hashtags and len(reply) + len(hashtags[-1]) < MAX_LENGTH:
+            reply += hashtags.pop()
+        return reply.strip()
 
     def on_quote(self, response_bytes):
         # Parse HTTP response

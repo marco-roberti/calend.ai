@@ -56,6 +56,23 @@ def get_tweet_author(tweet_id):
     return response['username'], response['name'], response['id']
 
 
+def get_trends():
+    logging.info(f'Updating hashtags')
+    response = os.popen(
+        f'twurl "/1.1/trends/place.json?id=23424853"'
+    ).read()
+    response = json.loads(response)
+
+    if 'errors' in response:
+        raise ConnectionError(response['errors'])
+    trends = filter(
+        lambda ht: ht.startswith('#'),
+        [x['name'] for x in response[0]['trends']]
+    )
+    trends = map(lambda ht: ' ' + ht, trends)
+    return list(trends)
+
+
 def post_reply(reply, to_tweet):
     logging.info(f'Posting tweet >>> {reply}')
     reply = reply.replace("'", "’")
