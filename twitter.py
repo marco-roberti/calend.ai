@@ -117,6 +117,7 @@ class Tweet:
         self.name = name
         self.tweet_id = tweet_id
         self.author_id = author_id
+        self._hashtags = None
 
     def __str__(self) -> str:
         return f'{self.name} @{self.username} : {self.text}'
@@ -127,7 +128,9 @@ class Tweet:
 
     @property
     def hashtags(self):
-        return [' ' + ht for ht in re.findall(r'#[a-zA-Z0-9_]+', self.text)]
+        if not self._hashtags:
+            self._hashtags = [' ' + ht for ht in re.findall(r'#[a-zA-Z0-9_]+', self.text)]
+        return self._hashtags
 
     @classmethod
     def from_id(cls, tweet_id):
