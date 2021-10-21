@@ -47,7 +47,7 @@ class CalendaBot:
         return self._hashtags
 
     def _update_hashtags(self):
-        self._hashtags = self.FIXED_HASHTAGS + get_trends()
+        self._hashtags = get_trends() + self.FIXED_HASHTAGS
         self._hashtags_updated = datetime.now()
 
     def _worker(self):
@@ -82,7 +82,7 @@ class CalendaBot:
         # if f'@{to_tweet.username.lower()}' not in reply:
         #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         # Add hashtags if possibile
-        hashtags = to_tweet.hashtags + self.hashtags
+        hashtags = self.hashtags + to_tweet.hashtags
         while hashtags and len(reply) + len(hashtags[-1]) < MAX_LENGTH:
             reply += hashtags.pop()
         return reply.strip()
