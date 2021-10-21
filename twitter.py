@@ -70,7 +70,7 @@ def get_trends():
         [x['name'] for x in response[0]['trends']]
     )
     trends = map(lambda ht: ' ' + ht, trends)
-    return list(trends)
+    return list(reversed(trends))
 
 
 def post_reply(reply, to_tweet):
