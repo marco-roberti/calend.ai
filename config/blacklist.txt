@@ -2,6 +2,8 @@
 5s, lega e m5s
 5s, lega o m5s
 5s, m5s
+5s, pd e 5s
+5s, pd o 5s
 5s, pd e m5s
 5s, pd o m5s
 m5s e 5s
