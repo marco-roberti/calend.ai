@@ -27,6 +27,7 @@ import nltk  # Here to have a nice missing dependency error message early on
 import numpy as np
 import transformers
 from datasets import load_dataset, load_metric
+from dateutil.relativedelta import relativedelta
 from filelock import FileLock
 from transformers import (
     AutoConfig,
@@ -188,10 +189,12 @@ def main():
     else:
         logger.info("There is nothing to do. Please pass `do_train`, `do_eval` and/or `do_predict`.")
         return
+    sample_weights = None
 
-    # Get the column names for input/target.
-    hashtags_column = 'input'
-    text_column = 'output'
+    # Get the column names for input/target/weights.
+    input_column = 'input'
+    output_column = 'output'
+    date_column = 'date'
 
     # Temporarily set max_target_length for training.
     max_target_length = data_args.max_target_length
@@ -204,8 +207,8 @@ def main():
         )
 
     def preprocess_function(examples):
-        inputs = examples[hashtags_column]
-        targets = examples[text_column]
+        inputs = examples[input_column]
+        targets = examples[output_column]
         inputs = [prefix + inp for inp in inputs]
         model_inputs = tokenizer(inputs, max_length=data_args.max_source_length, padding=padding, truncation=True)
 
@@ -223,10 +226,21 @@ def main():
         model_inputs["labels"] = labels["input_ids"]
         return model_inputs
 
+    def extract_weights(dataset):
+        # Convert string dates to dates
+        dates = dataset[date_column]
+        min_weight_date = min(dates)
+        max_weight_date = max(dates) - relativedelta(months=6)
+        date_span = (max_weight_date - min_weight_date).days
+        # Compute sample weights
+        weigths = [(date - min_weight_date).days / date_span if date < max_weight_date else 1 for date in dates]
+        return weigths
+
     if training_args.do_train:
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
+        sample_weights = extract_weights(train_dataset)
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
         with training_args.main_process_first(desc="train dataset map pre-processing"):
@@ -322,6 +336,7 @@ def main():
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=eval_dataset if training_args.do_eval else None,
+        sample_weights=sample_weights if training_args.do_train else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,

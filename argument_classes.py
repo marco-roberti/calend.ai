@@ -1,17 +1,25 @@
+from collections.abc import Sized
 from dataclasses import dataclass, field
-from typing import Optional, Union, Dict, Any, List, Tuple, Callable
+from typing import Optional, Union, Dict, Any, List, Tuple, Callable, Sequence
 
 import torch
+from packaging import version
 from torch import nn
 from torch.cuda.amp import autocast
 from torch.optim.optimizer import Optimizer
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, WeightedRandomSampler
 from transformers import Seq2SeqTrainingArguments, Seq2SeqTrainer, SchedulerType, get_constant_schedule_with_warmup, \
     get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup, \
     get_cosine_with_hard_restarts_schedule_with_warmup, get_polynomial_decay_schedule_with_warmup, \
     get_constant_schedule, add_start_docstrings, PreTrainedModel, TrainingArguments, DataCollator, \
     PreTrainedTokenizerBase, EvalPrediction, TrainerCallback
 from transformers.deepspeed import is_deepspeed_zero3_enabled
+from transformers.utils import logging
+
+_is_torch_generator_available = False
+if version.parse(torch.__version__) >= version.parse("1.6"):
+    _is_torch_generator_available = True
+logger = logging.get_logger(__name__)
 
 
 @dataclass
@@ -265,8 +273,8 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
 
     def __init__(self, model: Union[PreTrainedModel, nn.Module] = None, args: TrainingArguments = None,
                  data_collator: Optional[DataCollator] = None, train_dataset: Optional[Dataset] = None,
-                 eval_dataset: Optional[Dataset] = None, tokenizer: Optional[PreTrainedTokenizerBase] = None,
-                 model_init: Callable[[], PreTrainedModel] = None,
+                 eval_dataset: Optional[Dataset] = None, sample_weights: Sequence[float] = None,
+                 tokenizer: Optional[PreTrainedTokenizerBase] = None, model_init: Callable[[], PreTrainedModel] = None,
                  compute_metrics: Optional[Callable[[EvalPrediction], Dict]] = None,
                  callbacks: Optional[List[TrainerCallback]] = None,
                  optimizers: Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LambdaLR] = (None, None),
@@ -290,6 +298,25 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
         self.encoder_no_repeat_ngram_size = encoder_no_repeat_ngram_size
         self.num_beam_groups = num_beam_groups
         self.diversity_penalty = diversity_penalty
+        self.sample_weights = sample_weights
+
+    def _get_train_sampler(self) -> Optional[torch.utils.data.Sampler]:
+        if self.sample_weights is None or not isinstance(self.train_dataset, Sized):
+            return super()._get_train_sampler()
+        if self.args.group_by_length or self.args.world_size > 1:
+            logger.warning('Sample weighting not used when group_by_length is True or world_size > 1')
+            return super()._get_train_sampler()
+
+        generator = None
+        if self.args.world_size <= 1 and _is_torch_generator_available:
+            generator = torch.Generator()
+            generator.manual_seed(int(torch.empty((), dtype=torch.int64).random_().item()))
+
+        return WeightedRandomSampler(
+            weights=self.sample_weights,
+            num_samples=self.args.train_batch_size,
+            generator=generator if _is_torch_generator_available else None
+        )
 
     def get_scheduler(
             self,

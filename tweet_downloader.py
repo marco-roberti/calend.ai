@@ -19,7 +19,7 @@ profile_id = '2416067982'
 def process_tweet(response_tweet):
     # Ensure this tweet answers to an existing one
     if 'referenced_tweets' not in response_tweet or len(response_tweet['referenced_tweets']) != 1:
-        return None, response_tweet['created_at']
+        return None
     # Get the tweet the current one answers to
     input_tweet = connect_to_endpoint(
         tweet_url + response_tweet['referenced_tweets'][0]['id'],
@@ -27,17 +27,17 @@ def process_tweet(response_tweet):
     )
     # Ensure this tweet answers to an existing one (again)
     if 'errors' in input_tweet:
-        return None, response_tweet['created_at']
+        return None
     input_tweet = input_tweet['data']
     # Exclude self-answers and answers to tweet with media
     if input_tweet['author_id'] == profile_id or 'attachments' in input_tweet:
-        return None, response_tweet['created_at']
+        return None
     # Get input tweet's username
     username, name = get_profile_data(input_tweet['author_id'])
     # Return actual data
     input_text = f'{name} @{username} : ' + input_tweet['text'].replace('@CarloCalenda', '@Calend_AI')
     response_text = re.sub(r' http[^ ]+$', '', response_tweet['text']).replace('@CarloCalenda', '@Calend_AI')
-    return {'input': input_text, 'output': response_text}, response_tweet['created_at']
+    return {'input': input_text, 'output': response_text, 'date': response_tweet['created_at'][:10]}
 
 
 def load_tweets(filename):
@@ -67,10 +67,10 @@ def download_chunk(chunk_start, chunk_end):
 
     def process_response():
         for tw in json_response['data']:
-            tw, time = process_tweet(tw)
+            tw = process_tweet(tw)
             if tw is not None:
                 tweets.append(tw)
-            pbar.set_postfix_str(time)
+                pbar.set_postfix_str(tw['date'])
             pbar.update()
 
     json_response = connect_to_endpoint(search_url, query_params)
