@@ -332,19 +332,22 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
             return get_polynomial_decay_schedule_with_warmup(optimizer, num_warmup_steps, num_training_steps,
                                                              self.args.lr_scheduler_end, self.args.lr_scheduler_power)
 
-    def create_scheduler(self, num_training_steps: int):
+    def create_scheduler(self, num_training_steps: int, optimizer: torch.optim.Optimizer = None):
         """
-        Setup the scheduler. The optimizer of the trainer must have been set up before this method is called.
+        Setup the scheduler. The optimizer of the trainer must have been set up either before this method is called or
+        passed as an argument.
 
         Args:
-            num_training_steps (int): The number of training steps to do.
+            :param num_training_steps: The number of training steps to do.
+            :param optimizer: The optimizer of the trainer
         """
         if self.lr_scheduler is None:
             self.lr_scheduler = self.get_scheduler(
                 self.args.lr_scheduler_type,
-                self.optimizer,
+                optimizer=self.optimizer if optimizer is None else optimizer,
                 num_training_steps=num_training_steps,
             )
+        return self.lr_scheduler
 
     def prediction_step(
             self,
@@ -353,7 +356,7 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
             prediction_loss_only: bool,
             ignore_keys: Optional[List[str]] = None,
     ) -> Tuple[Optional[float], Optional[torch.Tensor], Optional[torch.Tensor]]:
-
+        assert isinstance(self.args, Seq2SeqTrainingArguments)
         if not self.args.predict_with_generate or prediction_loss_only:
             return super().prediction_step(
                 model, inputs, prediction_loss_only=prediction_loss_only, ignore_keys=ignore_keys
