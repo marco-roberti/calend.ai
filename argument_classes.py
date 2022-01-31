@@ -245,6 +245,17 @@ class DataTrainingArguments:
 @dataclass
 @add_start_docstrings(Seq2SeqTrainingArguments.__doc__)
 class Seq2SeqTrainingArgumentsRefined(Seq2SeqTrainingArguments):
+    weighted_sampling: bool = field(
+        default=True,
+        metadata={'help': 'Whether to use age-based weighted sampling of tweets during training, '
+                          'i.e. more frequent sampling of more recent tweets'}
+    )
+    early_stopping_patience: int = field(
+        default=0,
+        metadata={'help': 'Number of evaluation calls in which metric_for_best_model can worsen '
+                          'before stopping training. When set to zero, early stopping is disabled.'}
+    )
+
     lr_scheduler_end: float = field(
         default=1e-7, metadata={'help': 'The final value of the polynomial learning rate decay.'}
     )
@@ -308,14 +319,14 @@ class Seq2SeqTrainerRefined(Seq2SeqTrainer):
             return super()._get_train_sampler()
 
         generator = None
-        if self.args.world_size <= 1 and _is_torch_generator_available:
+        if _is_torch_generator_available:
             generator = torch.Generator()
             generator.manual_seed(int(torch.empty((), dtype=torch.int64).random_().item()))
 
         return WeightedRandomSampler(
             weights=self.sample_weights,
             num_samples=self.args.train_batch_size,
-            generator=generator if _is_torch_generator_available else None
+            generator=generator
         )
 
     def get_scheduler(

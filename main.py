@@ -34,6 +34,7 @@ from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
     DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
     HfArgumentParser,
     set_seed)
 from transformers.file_utils import is_offline_mode
@@ -240,7 +241,7 @@ def main():
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
-        sample_weights = extract_weights(train_dataset)
+        sample_weights = extract_weights(train_dataset) if training_args.weighted_sampling else None
         if data_args.max_train_samples is not None:
             train_dataset = train_dataset.select(range(data_args.max_train_samples))
         with training_args.main_process_first(desc="train dataset map pre-processing"):
@@ -330,6 +331,9 @@ def main():
         result = {k: round(v, 4) for k, v in result.items()}
         return result
 
+    callbacks = [EarlyStoppingCallback(training_args.early_stopping_patience)] \
+        if training_args.early_stopping_patience > 1 else None
+
     # Initialize our Trainer
     trainer = Seq2SeqTrainerRefined(
         model=model,
@@ -340,6 +344,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
+        callbacks=callbacks,
         max_new_tokens=model_args.max_new_tokens,
         min_length=model_args.min_length,
         max_length=model_args.max_length,
