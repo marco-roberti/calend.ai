@@ -14,7 +14,7 @@ def truecase(tweet):
         for i, token in enumerate(sentence.tokens):
             if i == 0 or any(w.upos in ['PROPN', 'X'] for w in token.words):
                 tweet[token.start_char] = tweet[token.start_char].upper()
-    return ''.join(tweet)
+    return ''.join(tweet) + '\n'
 
 
 if __name__ == '__main__':
