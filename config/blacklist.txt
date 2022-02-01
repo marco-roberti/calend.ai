@@ -1,5 +1,7 @@
 5s e m5s
+5s, lega e 5s
 5s, lega e m5s
+5s, lega o 5s
 5s, lega o m5s
 5s, m5s
 5s, pd e 5s
@@ -18,4 +20,5 @@ m5s, pd o 5s
 m5s, pd o movimento 5s
 ma come ho
 non lo so.
+non lo sò.
 siamoeuropei
