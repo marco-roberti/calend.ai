@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from datetime import date, timedelta
 from os import path
 
+from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
 from twitter import connect_to_endpoint, tweet_url, search_url, get_profile_data
@@ -99,6 +100,17 @@ def months_iterator(start_date, end_date):
     return iterator
 
 
+def split_by_date(tweets, n_months_ago):
+    older = list()
+    newer = list()
+    for tw in tweets:
+        if date.fromisoformat(tw['date']) < n_months_ago:
+            older.append(tw)
+        else:
+            newer.append(tw)
+    return older, newer
+
+
 def main(args):
     if not path.isdir('data'):
         os.mkdir('data')
@@ -109,15 +121,30 @@ def main(args):
     for start, end in months_iterator(start_date, end_date):
         tweets.extend(download_chunk(start, end))
 
-    # Shuffle, split and save dataset
+    # Shuffle, split, sort and save dataset
     random.shuffle(tweets)
+
     eval_size = round(0.05 * len(tweets))
-    save_tweets(tweets[:eval_size], path.join('data', f'test.json'))
-    save_tweets(tweets[eval_size:2 * eval_size], path.join('data', f'valid.json'))
-    save_tweets(tweets[2 * eval_size:], path.join('data', f'train.json'))
+    n_months_ago = date.today() - relativedelta(months=args.eval_last_n_months)
+    older, newer = split_by_date(tweets, n_months_ago)
+    if len(newer) < eval_size:
+        eval_size = len(newer) // 2
+
+    test_set = newer[:eval_size]
+    valid_set = newer[eval_size:2 * eval_size]
+    train_set = older + newer[2 * eval_size:]
+
+    for subset in (test_set, valid_set, train_set):
+        subset.sort(key=lambda tw: date.fromisoformat(tw['date']))
+
+    save_tweets(test_set, path.join('data', f'test.json'))
+    save_tweets(valid_set, path.join('data', f'valid.json'))
+    save_tweets(train_set, path.join('data', f'train.json'))
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--start_date', '-d', default='2020-10-18', help='YYYY-MM-DD')
+    parser.add_argument('--eval_last_n_months', type=int, default=6,
+                        help='Randomly select validation and test tweets from the last N months (default: 6)')
     main(parser.parse_args())
