@@ -67,6 +67,8 @@ def download_chunk(chunk_start, chunk_end):
     pbar = tqdm(desc=profile, unit='Tw')
 
     def process_response():
+        if json_response['meta']['result_count'] == 0:
+            return
         for tw in json_response['data']:
             tw = process_tweet(tw)
             if tw is not None:
