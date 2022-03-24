@@ -46,7 +46,7 @@ The training script is a modified version of HuggingFace's [`run_summarization.p
 ```bash
 python3 main.py config/train.json
 ```
-The model @Calend_AI is currently running is downloadable [here](https://datacloud.di.unito.it/index.php/s/wmpj4GxcJTy553a/download). Its Tensorboard training log [is available as well](https://tensorboard.dev/experiment/xWNfja3RQcqA19pJkGVcxg/#scalars&_smoothingWeight=0).
+The model @Calend_AI is currently running is downloadable [here](https://datacloud.di.unito.it/index.php/s/peCc4PWD72yP9rY/download). Its Tensorboard training log [is available as well](https://tensorboard.dev/experiment/xWNfja3RQcqA19pJkGVcxg/#scalars&_smoothingWeight=0).
 
 #### Interactive generation
 To check offline your model and tune the `config/generate.json` file, you can use one of the `interactive_*.py` scripts.
