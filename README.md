@@ -4,7 +4,7 @@ This repository contains the source code I used to create [@Calend_AI](https://t
 ### FAQ
 *Who is (or what is) [@Calend_AI](https://twitter.com/Calend_AI)?*
 
-It is an automated Italian Twitter profile. It mimics the peculiar writing style and content of the Italian politician [Carlo Calenda](), former Italian Minister of Economic Development, former candidate for mayor of Rome and currently MEP.
+It is an automated Italian Twitter profile. It mimics the peculiar writing style and content of the Italian politician [Carlo Calenda](https://en.wikipedia.org/wiki/Carlo_Calenda), former Italian Minister of Economic Development, former candidate for mayor of Rome and currently MEP.
 
 *How does it work?*
 
