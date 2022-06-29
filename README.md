@@ -16,7 +16,7 @@ I am [Marco Roberti](https://marcoroberti.com), a Ph.D. candidate at the Departm
 
 *What technologies does it use?*
 
-The bot is a [Hugging Face 🤗 Transformers](https://huggingface.co/docs/transformers/index) Language Model, obtained by fine-tuning a dataset created specifically from [@CarloCalenda](https://twitter.com/CarloCalenda) 's tweets, starting from the Italian T5 model developed by [Gabriele Sarti](https://github.com/gsarti) (University of Groningen).
+The bot is a [Hugging Face 🤗 Transformers](https://huggingface.co/docs/transformers/index) Language Model, obtained by fine-tuning a dataset created specifically from [@CarloCalenda](https://twitter.com/CarloCalenda) 's tweets, starting from the Italian T5 model developed by [Gabriele Sarti](https://gsarti.com/) (University of Groningen).
 
 ### HowTo
 
@@ -46,7 +46,7 @@ The training script is a modified version of HuggingFace's [`run_summarization.p
 ```bash
 python3 main.py config/train.json
 ```
-The model @Calend_AI is currently running is downloadable [here](https://datacloud.di.unito.it/index.php/s/peCc4PWD72yP9rY/download). Its Tensorboard training log [is available as well](https://tensorboard.dev/experiment/xWNfja3RQcqA19pJkGVcxg/#scalars&_smoothingWeight=0).
+The model @Calend_AI is currently running is downloadable [here](https://marcoroberti.cloudtb.online/calend_ai.zip). Its Tensorboard training log [is available as well](https://tensorboard.dev/experiment/xWNfja3RQcqA19pJkGVcxg/#scalars&_smoothingWeight=0).
 
 #### Interactive generation
 To check offline your model and tune the `config/generate.json` file, you can use one of the `interactive_*.py` scripts.
