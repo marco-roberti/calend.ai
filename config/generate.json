@@ -12,5 +12,6 @@
   "no_repeat_ngram_size": 0,
   "encoder_no_repeat_ngram_size": 2,
   "num_beam_groups": 1,
-  "diversity_penalty": 0.0
+  "diversity_penalty": 0.0,
+  "cite": "random"
 }

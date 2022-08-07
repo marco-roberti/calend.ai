@@ -18,7 +18,7 @@ def main(args):
         if not tweet.text:
             bot.interactive_set_args()
             continue
-        answers = bot.reply_to(tweet)
+        answers = bot.reply_to(tweet, bot.cite)
         for answer in answers:
             print(f'@Calend_AI: {answer}')
         print()

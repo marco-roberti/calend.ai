@@ -72,12 +72,14 @@ def get_trends():
     return list(reversed(list(trends)))
 
 
-def post_reply(reply, to_tweet):
+def post_reply(reply: str, to_tweet, cite: bool):
     logging.info(f'Posting tweet >>> {reply}')
     reply = reply.replace("'", "’")
-    response = os.popen(
-        f"twurl -d 'status={reply}&attachment_url={to_tweet.url}' /1.1/statuses/update.json"
-    ).read()
+    if cite:
+        cmd = f"twurl -d 'status={reply}&attachment_url={to_tweet.url}' /1.1/statuses/update.json"
+    else:
+        cmd = f"twurl -d 'status={reply}&in_reply_to_status_id={to_tweet.tweet_id}' /1.1/statuses/update.json"
+    response = os.popen(cmd).read()
     response = json.loads(response)
     if reply_id := response.get('id_str', None):
         logging.info(f'https://twitter.com/Calend_AI/status/{reply_id}')

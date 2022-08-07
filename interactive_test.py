@@ -16,7 +16,7 @@ def main(args):
         for line in lines:
             example = json.loads(line)
             inp, ref = example['input'], example['output']
-            answers = bot.reply_to(Tweet.from_str(inp))
+            answers = bot.reply_to(Tweet.from_str(inp), bot.cite)
             print(f'inp> {inp}')
             print(f'ref> {ref}')
             for answer in answers:
