@@ -14,7 +14,7 @@ from twitter import post_reply, Tweet, follow_author, MAX_LENGTH, get_trends
 
 
 class CalendaBot:
-    FIXED_HASHTAGS = [' #Calenda', ' #CalendAI']
+    FIXED_HASHTAGS = ['#Calenda', '#CalendAI']
 
     def __init__(self, args, interactive=False):
         with open(args.config_file) as f:
@@ -83,7 +83,9 @@ class CalendaBot:
         #     reply = f'@{to_tweet.username.lower()} {reply.strip()}'
         # Add hashtags if possibile
         hashtags = [ht for ht in self.hashtags if ht not in to_tweet.hashtags] + to_tweet.hashtags
-        while hashtags and len(reply) + len(hashtags[-1]) < MAX_LENGTH:
+        while hashtags and len(reply) + 1 + len(hashtags[-1]) < MAX_LENGTH:
+            if not reply.endswith('\n'):
+                reply += ' '
             reply += hashtags.pop()
         return reply.strip()
 

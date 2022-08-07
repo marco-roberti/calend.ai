@@ -69,8 +69,7 @@ def get_trends():
         lambda ht: ht.startswith('#'),
         [x['name'] for x in response[0]['trends']]
     )
-    trends = list(map(lambda ht: ' ' + ht, trends))
-    return list(reversed(trends))
+    return list(reversed(list(trends)))
 
 
 def post_reply(reply, to_tweet):
@@ -129,7 +128,7 @@ class Tweet:
     @property
     def hashtags(self):
         if not self._hashtags:
-            self._hashtags = [' ' + ht for ht in re.findall(r'#[a-zA-Z0-9_]+', self.text)]
+            self._hashtags = re.findall(r'#\w+', self.text)
         return self._hashtags
 
     @classmethod
@@ -143,7 +142,7 @@ class Tweet:
 
     @classmethod
     def from_str(cls, str_tweet):
-        name, username, text = re.search(r'(.+) @([A-Za-z0-9_]+) : (.+)', str_tweet).groups()
+        name, username, text = re.search(r'(.+) @(\w+) : (.+)', str_tweet).groups()
         return cls(text, username, name)
 
 
