@@ -9,6 +9,7 @@ import requests
 
 bearer_token = os.environ.get("BEARER_TOKEN")
 MAX_LENGTH = 280
+HT_CHARS = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_')
 
 search_url = 'https://api.twitter.com/2/tweets/search/all'
 tweet_url = 'https://api.twitter.com/2/tweets/'
@@ -66,7 +67,7 @@ def get_trends():
     if 'errors' in response:
         raise ConnectionError(response['errors'])
     trends = filter(
-        lambda ht: ht.startswith('#'),
+        lambda ht: ht.startswith('#') and all(c in HT_CHARS for c in ht[1:]),
         [x['name'] for x in response[0]['trends']]
     )
     return list(reversed(list(trends)))
