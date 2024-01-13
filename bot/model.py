@@ -43,7 +43,7 @@ class CalendaBot:
 
     @property
     def cite(self):
-        return random.random() < 0.5 if self._cite == 'random' else self._cite
+        return (random.random() < 0.5) if self._cite == 'random' else self._cite
 
     @property
     def hashtags(self):

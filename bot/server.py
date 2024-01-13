@@ -12,7 +12,7 @@ def main(args):
     bot = CalendaBot(args, interactive=True)
 
     stream = Stream([
-        {"value": "@Calend_AI -to:Calend_AI -has:links", "tag": "qt_reply"}
+        {"value": "@Calend_AI -is:retweet -is:reply -has:links", "tag": "qt_reply"}
     ])
     while True:
         # noinspection PyBroadException
